@@ -1,5 +1,7 @@
-﻿namespace Domain.Entities;
-public class Product
+﻿using Domain.Common;
+
+namespace Domain.Entities;
+public class Product : BaseEntity
 {
     public int Id { get; set; }
     public string Name { get; set; }

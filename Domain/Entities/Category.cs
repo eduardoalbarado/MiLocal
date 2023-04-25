@@ -1,6 +1,8 @@
-﻿namespace Domain.Entities;
+﻿using Domain.Common;
 
-public class Category
+namespace Domain.Entities;
+
+public class Category : BaseEntity
 {
     public int Id { get; set; }
     public string Name { get; set; }
