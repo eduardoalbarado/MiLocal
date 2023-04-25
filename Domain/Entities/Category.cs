@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace Domain.Entities;
+﻿namespace Domain.Entities;
 
 public class Category
 {

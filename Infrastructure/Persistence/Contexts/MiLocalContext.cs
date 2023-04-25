@@ -7,7 +7,7 @@ public class MiLocalContext : DbContext
 {
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite("Data Source=MiLocal.db");
+        optionsBuilder.UseSqlite("Data Source=..\\Data\\MiLocal.db");
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
