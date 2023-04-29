@@ -29,8 +29,8 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Paginat
         var spec = new ProductPagedSpecifications(request.PageNumber, request.PageSize, request.Enabled);
         var products = await _repositoryAsync.ListAsync(spec, cancellationToken);
         var productsCount = await _repositoryAsync.CountAsync(spec, cancellationToken);
-        var result = _mapper.Map<PaginatedList<ProductDto>>(products);
+        var result = _mapper.Map<List<ProductDto>>(products);
 
-        return new List<ProductDto>(result, productsCount, request.PageNumber, request.PageSize);
+        return new PaginatedList<ProductDto>(result, productsCount, request.PageNumber, request.PageSize);
     }
 }
