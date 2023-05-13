@@ -20,6 +20,8 @@
 
   <ItemGroup>
     <Folder Include="Common\Specifications\" />
+    <Folder Include="Contracts\Persistence\" />
+    <Folder Include="Interfaces\DataAccess\" />
     <Folder Include="MappingProfiles\" />
   </ItemGroup>
 

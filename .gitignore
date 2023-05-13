@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /Infrastructure/Migrations
 /Data
+/Presentation/FunctionAppApi/Data/MiLocalDb.db
+/Presentation/FunctionAppApi/Data

@@ -22,6 +22,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{2B971280-E2A6-416C-8980-9F74DB042D90}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionAppApi", "Presentation\FunctionAppApi\FunctionAppApi.csproj", "{78EEEDD7-B3B0-4A5A-8BE9-08C81FBC5AE4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0561A295-3043-4C21-99E0-9A0CE3BECB02} = {0561A295-3043-4C21-99E0-9A0CE3BECB02}
+		{AA1A09DE-363B-4FA2-A386-DF41DD91A2DA} = {AA1A09DE-363B-4FA2-A386-DF41DD91A2DA}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

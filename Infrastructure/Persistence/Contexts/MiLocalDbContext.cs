@@ -1,13 +1,17 @@
-﻿using Domain.Entities;
+﻿using Application.Interfaces;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using System;
 using System.Reflection;
 
 namespace Infrastructure.Persistence.Contexts;
-public class MiLocalContext : DbContext
+public class MiLocalDbContext : DbContext, IDbContext
 {
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public MiLocalDbContext(
+    DbContextOptions<MiLocalDbContext> options) : base(options)
     {
-        optionsBuilder.UseSqlite("Data Source=..\\Data\\MiLocal.db");
+        ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
