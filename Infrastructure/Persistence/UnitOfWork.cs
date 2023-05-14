@@ -1,6 +1,6 @@
 ﻿using Application.Interfaces;
 using Infrastructure.Persistence.Contexts;
-using Noname.Infrastructure.Repository;
+using Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 

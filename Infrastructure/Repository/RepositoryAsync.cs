@@ -3,7 +3,7 @@ using Ardalis.Specification.EntityFrameworkCore;
 using Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace Noname.Infrastructure.Repository;
+namespace Infrastructure.Repository;
 public class RepositoryAsync<T> : RepositoryBase<T>, IRepositoryAsync<T> where T : class
 {
     private readonly MiLocalDbContext dbContext;
