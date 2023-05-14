@@ -10,8 +10,8 @@ namespace Application.Features.Products.Queries.GetProducts
             Query.Skip((pageNumber - 1) * pageSize)
                  .Take(pageSize);
 
-            //if (enabled is not null)
-            //    Query.Where(x => x.Enabled == enabled);
+            if (enabled is not null)
+                Query.Where(x => x.Enabled == enabled);
 
             Query.OrderBy(x => x.Id);
         }

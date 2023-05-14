@@ -37,7 +37,7 @@ namespace Application.Features.Products.Commands.AddProduct
             };
 
             // Add the new product to the repository
-            await repository.AddAsync(product);
+            await repository.AddAsync(product, cancellationToken);
 
             // Save changes to the database
             await _unitOfWork.SaveChangesAsync();

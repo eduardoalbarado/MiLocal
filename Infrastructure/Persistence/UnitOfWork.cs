@@ -4,6 +4,7 @@ using Noname.Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
+namespace Infrastructure.Persistence;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly MiLocalDbContext _context;
@@ -17,10 +18,7 @@ public class UnitOfWork : IUnitOfWork
 
     public IRepositoryAsync<TEntity> GetRepository<TEntity>() where TEntity : class
     {
-        if (_repositories == null)
-        {
-            _repositories = new Dictionary<Type, object>();
-        }
+        _repositories ??= new Dictionary<Type, object>();
 
         var type = typeof(TEntity);
         if (!_repositories.ContainsKey(type))

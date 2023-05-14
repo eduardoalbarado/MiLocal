@@ -10,7 +10,7 @@ public class GetProductsQuery : ProductDto, IRequest<PaginatedList<ProductDto>>
 {
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 10;
-    public bool Enabled { get; set; }
+    public bool? Enabled { get; set; }
 }
 
 public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, PaginatedList<ProductDto>>
@@ -29,8 +29,8 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Paginat
         // Get the repository for MyEntity
         var repository = _unitOfWork.GetRepository<Product>();
 
-        ProductPagedSpecifications spec = new ProductPagedSpecifications(1, 10, true);
-        var products = await repository.ListAsync();
+        ProductPagedSpecifications spec = new(request.PageNumber, request.PageSize, request.Enabled);
+        var products = await repository.ListAsync(spec, cancellationToken);
         var resultUOWDto = _mapper.Map<List<ProductDto>>(products);
 
         return new PaginatedList<ProductDto>(resultUOWDto, resultUOWDto.Count, request.PageNumber, request.PageSize);
