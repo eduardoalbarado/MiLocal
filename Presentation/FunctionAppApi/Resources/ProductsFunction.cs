@@ -2,6 +2,7 @@ using Application.Features.Products.Commands.AddProduct;
 using Application.Features.Products.Commands.DeleteProduct;
 using Application.Features.Products.Commands.UpdateProduct;
 using Application.Features.Products.Queries.GetProducts;
+using Application.Features.Products.Queries.GetProductById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -11,75 +12,88 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace FunctionAppApi.Resources;
-
-public class ProductsFunction
+namespace FunctionAppApi.Resources
 {
-    private readonly ILogger<ProductsFunction> _logger;
-    private readonly IMediator _mediator;
-
-    public ProductsFunction(ILogger<ProductsFunction> logger, IMediator mediator)
+    public class ProductsFunction
     {
-        _logger = logger;
-        _mediator = mediator;
-    }
+        private readonly ILogger<ProductsFunction> _logger;
+        private readonly IMediator _mediator;
 
-    [Function("GetProducts")]
-    [OpenApiOperation(operationId: "products", tags: new[] { "Products" })]
-    [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
-    public async Task<IActionResult> GetProducts(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "products")] HttpRequestData req)
-    {
-        _logger.LogInformation($"Call to {nameof(GetProducts)}");
-        var result = await _mediator.Send(new GetProductsQuery());
+        public ProductsFunction(ILogger<ProductsFunction> logger, IMediator mediator)
+        {
+            _logger = logger;
+            _mediator = mediator;
+        }
 
-        return new OkObjectResult(result);
-    }
+        [Function("GetProducts")]
+        [OpenApiOperation(operationId: "products", tags: new[] { "Products" })]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
+        public async Task<IActionResult> GetProducts(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "products")] HttpRequestData req)
+        {
+            _logger.LogInformation($"Call to {nameof(GetProducts)}");
+            var result = await _mediator.Send(new GetProductsQuery());
 
-    [Function("AddProduct")]
-    [OpenApiOperation(operationId: "AddProduct", tags: new[] { "Products" })]
-    [OpenApiRequestBody("application/json", typeof(AddProductCommand))]
-    public async Task<IActionResult> AddProduct(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "products")] HttpRequestData req)
-    {
-        _logger.LogInformation("AddProduct function processed a request.");
+            return new OkObjectResult(result);
+        }
 
-        var command = await req.ReadFromJsonAsync<AddProductCommand>();
+        [Function("GetProductById")]
+        [OpenApiOperation(operationId: "GetProductById", tags: new[] { "Products" })]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
+        public async Task<IActionResult> GetProductById(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "products/{id}")] HttpRequestData req, int id)
+        {
+            _logger.LogInformation($"Call to {nameof(GetProductById)} with Id: {id}");
+            var result = await _mediator.Send(new GetProductByIdQuery { Id = id });
 
-        var result = await _mediator.Send(command);
+            return new OkObjectResult(result);
+        }
 
-        return new OkObjectResult(result);
-    }
+        [Function("AddProduct")]
+        [OpenApiOperation(operationId: "AddProduct", tags: new[] { "Products" })]
+        [OpenApiRequestBody("application/json", typeof(AddProductCommand))]
+        public async Task<IActionResult> AddProduct(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "products")] HttpRequestData req)
+        {
+            _logger.LogInformation("AddProduct function processed a request.");
 
-    [Function("DeleteProduct")]
-    [OpenApiOperation(operationId: "DeleteProduct", tags: new[] { "Products" })]
-    [OpenApiRequestBody("application/json", typeof(DeleteProductCommand))]
-    public async Task<IActionResult> DeleteProduct(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "products/{id}")] HttpRequestData req, int id)
-    {
-        _logger.LogInformation($"DeleteProduct function processed a request for Id: {id}");
+            var command = await req.ReadFromJsonAsync<AddProductCommand>();
 
-        var command = new DeleteProductCommand { Id = id };
+            var result = await _mediator.Send(command);
 
-        var result = await _mediator.Send(command);
+            return new OkObjectResult(result);
+        }
 
-        return new OkObjectResult(result);
-    }
+        [Function("DeleteProduct")]
+        [OpenApiOperation(operationId: "DeleteProduct", tags: new[] { "Products" })]
+        [OpenApiRequestBody("application/json", typeof(DeleteProductCommand))]
+        public async Task<IActionResult> DeleteProduct(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "products/{id}")] HttpRequestData req, int id)
+        {
+            _logger.LogInformation($"DeleteProduct function processed a request for Id: {id}");
 
-    [Function("UpdateProduct")]
-    [OpenApiOperation(operationId: "UpdateProduct", tags: new[] { "Products" })]
-    [OpenApiRequestBody("application/json", typeof(UpdateProductCommand))]
-    public async Task<IActionResult> UpdateProduct(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "products/{id}")] HttpRequestData req, int id)
-    {
-        _logger.LogInformation($"UpdateProduct function processed a request for Id: {id}");
+            var command = new DeleteProductCommand { Id = id };
 
-        var command = await req.ReadFromJsonAsync<UpdateProductCommand>();
+            var result = await _mediator.Send(command);
 
-        command.Id = id;
+            return new OkObjectResult(result);
+        }
 
-        var result = await _mediator.Send(command);
+        [Function("UpdateProduct")]
+        [OpenApiOperation(operationId: "UpdateProduct", tags: new[] { "Products" })]
+        [OpenApiRequestBody("application/json", typeof(UpdateProductCommand))]
+        public async Task<IActionResult> UpdateProduct(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "products/{id}")] HttpRequestData req, int id)
+        {
+            _logger.LogInformation($"UpdateProduct function processed a request for Id: {id}");
 
-        return new OkObjectResult(result);
+            var command = await req.ReadFromJsonAsync<UpdateProductCommand>();
+
+            command.Id = id;
+
+            var result = await _mediator.Send(command);
+
+            return new OkObjectResult(result);
+        }
     }
 }
