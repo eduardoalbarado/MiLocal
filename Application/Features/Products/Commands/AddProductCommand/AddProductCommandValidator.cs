@@ -2,9 +2,9 @@ using FluentValidation;
 
 namespace Application.Features.Products.Commands.AddProduct
 {
-    public class UpdateProductCommandValidator : AbstractValidator<AddProductCommand>
+    public class AddProductCommandValidator : AbstractValidator<AddProductCommand>
     {
-        public UpdateProductCommandValidator()
+        public AddProductCommandValidator()
         {
             RuleFor(p => p.Name)
                 .NotEmpty().WithMessage("Name is required.")
