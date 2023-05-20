@@ -1,4 +1,4 @@
-﻿using Application.Features.Products.Queries.GetProducts;
+﻿using Application.Common.Models;
 using AutoMapper;
 using Domain.Entities;
 

@@ -2,7 +2,7 @@
 using AutoMapper;
 using Domain.Entities;
 
-namespace Application.Features.Products.Queries.GetProducts
+namespace Application.Common.Models
 {
     public class ProductDto : IMapFrom<Product>
     {

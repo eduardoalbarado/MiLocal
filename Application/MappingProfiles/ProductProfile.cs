@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Application.Features.Products.Commands.AddProduct;
-using Application.Features.Products.Queries.GetProducts;
 using Domain.Entities;
+using Application.Common.Models;
 
 namespace Application.MappingProfiles
 {
