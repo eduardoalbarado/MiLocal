@@ -11,6 +11,8 @@ namespace Application.Features.Products.Queries.GetProducts
         public string ShortName { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
+        public bool Enabled { get; set; }
+        public bool Kit { get; set; }
         public void Mapping(Profile profile)
         {
             profile.CreateMap<Product, ProductDto>();
