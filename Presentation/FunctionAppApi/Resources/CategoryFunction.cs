@@ -82,13 +82,14 @@ namespace FunctionAppApi.Resources
 
         [Function("UpdateCategory")]
         [OpenApiOperation(operationId: "UpdateCategory", tags: new[] { "Categories" })]
-        [OpenApiRequestBody("application/json", typeof(UpdateCategoryCommand))]
+        [OpenApiRequestBody("application/json", typeof(UpdateCategoryDto))]
         public async Task<IActionResult> UpdateCategory(
             [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "categories/{id}")] HttpRequestData req, int id)
         {
             _logger.LogInformation($"UpdateCategory function processed a request for Id: {id}");
 
-            var command = await req.ReadFromJsonAsync<UpdateCategoryCommand>();
+            var updateCategoryDto = await req.ReadFromJsonAsync<UpdateCategoryDto>();
+            var command = _mapper.Map<UpdateCategoryCommand>(updateCategoryDto);
             command.Id = id;
             var result = await _mediator.Send(command);
 
