@@ -1,13 +1,12 @@
+using Application.Common.Models;
 using Application.Exceptions;
 using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.Categories.Commands.UpdateCategoryCommand
 {
-    public class UpdateCategoryCommand : IRequest<Unit>
+    public class UpdateCategoryCommand : UpdateCategoryDto, IRequest<Unit>
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
     }
 
     public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryCommand, Unit>
