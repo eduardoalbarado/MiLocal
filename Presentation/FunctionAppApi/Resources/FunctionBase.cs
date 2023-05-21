@@ -1,6 +1,13 @@
-﻿using AutoMapper;
-using MediatR;
-using Microsoft.Extensions.Logging;
+﻿global using Application.Common.Models;
+global using AutoMapper;
+global using MediatR;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.Azure.Functions.Worker;
+global using Microsoft.Azure.Functions.Worker.Http;
+global using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
+global using Microsoft.Extensions.Logging;
+global using System.Net;
+global using System.Threading.Tasks;
 
 namespace FunctionAppApi.Resources;
 public abstract class FunctionBase
