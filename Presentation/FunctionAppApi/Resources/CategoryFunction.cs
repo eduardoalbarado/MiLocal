@@ -1,8 +1,10 @@
-﻿using Application.Features.Categories.Commands.AddCategoryCommand;
+﻿using Application.Common.Models;
+using Application.Features.Categories.Commands.AddCategoryCommand;
 using Application.Features.Categories.Commands.DeleteCategoryCommand;
 using Application.Features.Categories.Commands.UpdateCategoryCommand;
 using Application.Features.Categories.Queries.GetCategories;
 using Application.Features.Categories.Queries.GetCategoryById;
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -18,11 +20,13 @@ namespace FunctionAppApi.Resources
     {
         private readonly ILogger<CategoryFunction> _logger;
         private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
 
-        public CategoryFunction(ILogger<CategoryFunction> logger, IMediator mediator)
+        public CategoryFunction(ILogger<CategoryFunction> logger, IMediator mediator, IMapper mapper)
         {
             _logger = logger;
             _mediator = mediator;
+            _mapper = mapper;
         }
 
         [Function("GetCategories")]
@@ -51,13 +55,14 @@ namespace FunctionAppApi.Resources
 
         [Function("AddCategory")]
         [OpenApiOperation(operationId: "AddCategory", tags: new[] { "Categories" })]
-        [OpenApiRequestBody("application/json", typeof(AddCategoryCommand))]
+        [OpenApiRequestBody("application/json", typeof(AddCategoryDto))]
         public async Task<IActionResult> AddCategory(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "categories")] HttpRequestData req)
         {
             _logger.LogInformation("AddCategory function processed a request.");
 
-            var command = await req.ReadFromJsonAsync<AddCategoryCommand>();
+            var addCategoryDto = await req.ReadFromJsonAsync<AddCategoryDto>();
+            var command = _mapper.Map<AddCategoryCommand>(addCategoryDto);
             var result = await _mediator.Send(command);
             return new OkObjectResult(result);
         }

@@ -1,12 +1,12 @@
+using Application.Common.Models;
 using AutoMapper;
 using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.Categories.Commands.AddCategoryCommand
 {
-    public class AddCategoryCommand : IRequest<int>
+    public class AddCategoryCommand : AddCategoryDto, IRequest<int>
     {
-        public string Name { get; set; }
     }
 
     public class AddCategoryCommandHandler : IRequestHandler<AddCategoryCommand, int>
