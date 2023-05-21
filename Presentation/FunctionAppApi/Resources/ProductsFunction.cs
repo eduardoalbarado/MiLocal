@@ -1,8 +1,10 @@
+using Application.Common.Models;
 using Application.Features.Products.Commands.AddProduct;
 using Application.Features.Products.Commands.DeleteProduct;
 using Application.Features.Products.Commands.UpdateProduct;
-using Application.Features.Products.Queries.GetProducts;
 using Application.Features.Products.Queries.GetProductById;
+using Application.Features.Products.Queries.GetProducts;
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -11,23 +13,14 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Threading.Tasks;
-using AutoMapper;
-using Application.Common.Models;
-using Application.Features.Categories.Commands.AddCategoryCommand;
 
 namespace FunctionAppApi.Resources
 {
-    public class ProductsFunction
+    public class ProductsFunction : FunctionBase
     {
-        private readonly ILogger<ProductsFunction> _logger;
-        private readonly IMediator _mediator;
-        private readonly IMapper _mapper;
-
         public ProductsFunction(ILogger<ProductsFunction> logger, IMediator mediator, IMapper mapper)
+            :base(logger, mediator, mapper)
         {
-            _logger = logger;
-            _mediator = mediator;
-            _mapper = mapper;
         }
 
         [Function("GetProducts")]
