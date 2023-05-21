@@ -54,7 +54,6 @@ namespace FunctionAppApi.Resources
 
         [Function("DeleteProduct")]
         [OpenApiOperation(operationId: "DeleteProduct", tags: new[] { "Products" })]
-        [OpenApiRequestBody("application/json", typeof(DeleteProductCommand))]
         public async Task<IActionResult> DeleteProduct(
             [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "products/{id}")] HttpRequestData req, int id)
         {

@@ -1,32 +1,17 @@
-﻿using Application.Common.Models;
-using Application.Features.Categories.Commands.AddCategoryCommand;
+﻿using Application.Features.Categories.Commands.AddCategoryCommand;
 using Application.Features.Categories.Commands.DeleteCategoryCommand;
 using Application.Features.Categories.Commands.UpdateCategoryCommand;
 using Application.Features.Categories.Queries.GetCategories;
 using Application.Features.Categories.Queries.GetCategoryById;
-using AutoMapper;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Microsoft.Extensions.Logging;
-using System.Net;
-using System.Threading.Tasks;
 
 namespace FunctionAppApi.Resources
 {
-    public class CategoryFunction
+    public class CategoryFunction : FunctionBase
     {
-        private readonly ILogger<CategoryFunction> _logger;
-        private readonly IMediator _mediator;
-        private readonly IMapper _mapper;
 
         public CategoryFunction(ILogger<CategoryFunction> logger, IMediator mediator, IMapper mapper)
+            : base(logger, mediator, mapper)
         {
-            _logger = logger;
-            _mediator = mediator;
-            _mapper = mapper;
         }
 
         [Function("GetCategories")]
@@ -69,7 +54,6 @@ namespace FunctionAppApi.Resources
 
         [Function("DeleteCategory")]
         [OpenApiOperation(operationId: "DeleteCategory", tags: new[] { "Categories" })]
-        [OpenApiRequestBody("application/json", typeof(DeleteCategoryCommand))]
         public async Task<IActionResult> DeleteCategory(
             [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "categories/{id}")] HttpRequestData req, int id)
         {
