@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Threading.Tasks;
 
 namespace FunctionAppApi;
 class Program
@@ -19,6 +19,16 @@ class Program
                 startup.ConfigureServices(services);
             })
             .ConfigureFunctionsWorkerDefaults()
+            .ConfigureServices(services =>
+            {
+                services.AddHttpClient(); // Add any additional services needed for your middleware
+                services.AddTransient<AuthenticationMiddleware>(); // Register the AuthenticationMiddleware
+            })
+            .ConfigureFunctionsWorkerDefaults((context, workerBuilder) =>
+            {
+                // Add the middleware to the pipeline
+                workerBuilder.UseMiddleware<AuthenticationMiddleware>();
+            })
             //.ConfigureOpenApi()
             .Build();
 
