@@ -1,7 +1,5 @@
-﻿using Domain.Common;
-
-namespace Domain.Entities;
-public class Product : BaseEntity
+﻿namespace Application.Common.Models;
+public class UpdateProductDto
 {
     public int Id { get; set; }
     public string Name { get; set; }
@@ -13,5 +11,4 @@ public class Product : BaseEntity
     public decimal CostInDollars { get; set; }
     public bool Enabled { get; set; }
     public bool Kit { get; set; }
-    public virtual ICollection<ProductCategory>? ProductCategories { get; set; }
 }
