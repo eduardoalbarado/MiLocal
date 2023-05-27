@@ -1,6 +1,6 @@
 ﻿using Ardalis.Specification;
 using Domain.Entities;
-
+namespace Application.Features.Products.Queries.GetProductByCategory;
 public class ProductPagedSpecifications : Specification<Product>
 {
     public ProductPagedSpecifications(int pageNumber, int pageSize, bool? enabled, int? category)
