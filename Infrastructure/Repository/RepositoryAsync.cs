@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+// TODO: Update the base repository to include additional repository methods related to the shopping cart.
+using Application.Interfaces;
 using Ardalis.Specification.EntityFrameworkCore;
 using Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore.Storage;

@@ -1,10 +1,10 @@
-using System.Collections.Generic;
+using Domain.Common;
 
 namespace Domain.Entities;
-public class Cart
+public class Cart : BaseEntity
 {
     public int Id { get; set; }
-    public string UserId { get; set; }
+    public Guid UserId { get; set; }
     public List<CartItem> Items { get; set; }
     public decimal TotalPrice { get; set; }
     // Additional properties and methods for the shopping cart
