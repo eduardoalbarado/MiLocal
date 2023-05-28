@@ -1,4 +1,4 @@
-﻿namespace Application.Features.Carts.Queries.GetCartByUserId;
+﻿namespace Application.Features.Carts.Queries.GetCart;
 public class CartDto
 {
     public int UserId { get; set; }

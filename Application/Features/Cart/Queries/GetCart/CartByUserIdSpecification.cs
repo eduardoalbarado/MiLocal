@@ -1,6 +1,6 @@
 ﻿using Ardalis.Specification;
 using Domain.Entities;
-namespace Application.Features.Carts.Queries.GetCartByUserId;
+namespace Application.Features.Carts.Queries.GetCart;
 public class CartByUserIdSpecification : Specification<Cart>
 {
     public CartByUserIdSpecification(Guid userId)

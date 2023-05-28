@@ -1,4 +1,5 @@
 using Application.Common.Models;
+using Application.Features.Carts.Queries.GetCartByUserId;
 using Domain.Entities;
 using MediatR;
 

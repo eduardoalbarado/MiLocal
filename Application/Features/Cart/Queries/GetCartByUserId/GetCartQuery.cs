@@ -1,5 +1,4 @@
 using Application.Common.Models;
-using Application.Features.Carts.Queries.GetCart;
 using AutoMapper;
 using Domain.Entities;
 using MediatR;

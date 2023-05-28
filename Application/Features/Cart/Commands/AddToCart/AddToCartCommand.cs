@@ -1,4 +1,5 @@
 using Application.Exceptions;
+using Application.Features.Carts.Queries.GetCartByUserId;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
