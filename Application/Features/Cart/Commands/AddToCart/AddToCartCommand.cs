@@ -1,11 +1,13 @@
+using Application.Exceptions;
+using AutoMapper;
 using Domain.Entities;
 using MediatR;
-using AutoMapper;
-using Application.Exceptions;
 
 namespace Application.Features.Carts.Commands.AddToCart;
+
 public class AddToCartCommand : IRequest<int>
 {
+    public Guid UserId { get; set; }
     public int ProductId { get; set; }
     public int Quantity { get; set; }
 }
@@ -34,6 +36,17 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, int>
             throw new NotFoundException("Product not found.", request.ProductId);
         }
 
+        var cartRepository = _unitOfWork.GetRepository<Cart>();
+        var cartSpec = new CartByUserIdSpecification(request.UserId);
+        var cart = await cartRepository.GetBySpecAsync(cartSpec, cancellationToken);
+
+        if (cart == null)
+        {
+            // Create a new cart for the user if it doesn't exist
+            cart = new Cart(request.UserId);
+            await cartRepository.AddAsync(cart, cancellationToken);
+        }
+
         // Create a new cart item and map the data from the request
         var cartItem = new CartItem
         {
@@ -43,7 +56,8 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, int>
             Price = product.Price
         };
 
-        await repository.AddAsync(cartItem, cancellationToken);
+        cart.Items.Add(cartItem);
+
         await _unitOfWork.SaveChangesAsync();
 
         return cartItem.Id;
