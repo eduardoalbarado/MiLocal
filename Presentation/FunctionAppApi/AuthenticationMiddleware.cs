@@ -1,5 +1,7 @@
+using FunctionAppApi.Extensions;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace FunctionAppApi
@@ -11,18 +13,32 @@ namespace FunctionAppApi
         public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
         {
             _logger = context.GetLogger<AuthenticationMiddleware>();
-            var req = context.BindingContext.BindingData["req"] as HttpRequestData;
+
+
+            context.TryExtractHttpRequestData(out var req);
+
+            if (context.TryExtractHttpRequestData(out var requestSwagger))
+            {
+                if (requestSwagger.Url.PathAndQuery.Contains("/swagger"))
+                {
+                    await next(context);
+                    return;
+                }
+            }
 
             // Check if the request contains the authorization header
             if (!req.Headers.TryGetValues("Authorization", out var authorization) || !authorization.Any())
             {
-                var response = req.CreateResponse(HttpStatusCode.Unauthorized);
-                await response.WriteStringAsync("You must provide valid credentials to access this resource.");
-                return;
+                ////TODO: Add a bypass for Debugging or Loca running to allow work without token
+                //var response = req.CreateResponse(HttpStatusCode.Unauthorized);
+                //response.Headers.Add("Content-Type", "text/plain");
+                //await response.WriteStringAsync("You must provide valid credentials to access this resource.");
+                //context.SendResponseAsync(response);
+                //return;
             }
 
             // Get the token from the authorization header
-            var token = authorization.First().Replace("Bearer ", "");
+            var token = authorization?.First().Replace("Bearer ", "") ?? string.Empty;
 
             // TODO: Validate the token and retrieve the user context
             var userContext = GetUserContextFromToken(token);
@@ -30,7 +46,9 @@ namespace FunctionAppApi
             if (userContext == null)
             {
                 var response = req.CreateResponse(HttpStatusCode.Unauthorized);
+                response.Headers.Add("Content-Type", "text/plain");
                 await response.WriteStringAsync("Invalid token or user context.");
+                context.SendResponseAsync(response);
                 return;
             }
 
