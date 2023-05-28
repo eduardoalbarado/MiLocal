@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -18,16 +19,13 @@ class Program
                 Startup startup = new Startup(context.Configuration);
                 startup.ConfigureServices(services);
             })
-            .ConfigureFunctionsWorkerDefaults()
+            .ConfigureFunctionsWorkerDefaults(builder =>
+            {
+                builder.UseMiddleware<AuthenticationMiddleware>();
+            })
             .ConfigureServices(services =>
             {
                 services.AddHttpClient(); // Add any additional services needed for your middleware
-                services.AddTransient<AuthenticationMiddleware>(); // Register the AuthenticationMiddleware
-            })
-            .ConfigureFunctionsWorkerDefaults((context, workerBuilder) =>
-            {
-                // Add the middleware to the pipeline
-                workerBuilder.UseMiddleware<AuthenticationMiddleware>();
             })
             //.ConfigureOpenApi()
             .Build();
