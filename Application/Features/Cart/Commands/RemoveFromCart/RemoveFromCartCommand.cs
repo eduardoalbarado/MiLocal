@@ -1,48 +1,50 @@
 using Application.Common.Models;
 using Application.Features.Carts.Queries.GetCartByUserId;
+using Application.Interfaces;
 using Domain.Entities;
 using MediatR;
 
-namespace Application.Features.Carts.Commands.RemoveFromCart
+namespace Application.Features.Carts.Commands.RemoveFromCart;
+public class RemoveFromCartCommand : IRequest<Result<Unit>>
 {
-    public class RemoveFromCartCommand : IRequest<Result<Unit>>
+    public int CartItemId { get; set; }
+}
+
+public class RemoveFromCartCommandHandler : IRequestHandler<RemoveFromCartCommand, Result<Unit>>
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserContextService _userContextService;
+
+    public RemoveFromCartCommandHandler(IUnitOfWork unitOfWork, IUserContextService userContextService)
     {
-        public Guid UserId { get; set; }
-        public int CartItemId { get; set; }
+        _unitOfWork = unitOfWork;
+        _userContextService = userContextService;
     }
 
-    public class RemoveFromCartCommandHandler : IRequestHandler<RemoveFromCartCommand, Result<Unit>>
+    public async Task<Result<Unit>> Handle(RemoveFromCartCommand request, CancellationToken cancellationToken)
     {
-        private readonly IUnitOfWork _unitOfWork;
+        var userId = Guid.Parse(_userContextService.GetUserContext().UserId);
 
-        public RemoveFromCartCommandHandler(IUnitOfWork unitOfWork)
+        var repository = _unitOfWork.GetRepository<Cart>();
+        var cartSpec = new CartByUserIdSpecification(userId);
+        var cart = await repository.GetBySpecAsync(cartSpec, cancellationToken);
+
+        if (cart == null)
         {
-            _unitOfWork = unitOfWork;
+            return Result<Unit>.Failure($"Cart for user with UserId {userId} not found");
         }
 
-        public async Task<Result<Unit>> Handle(RemoveFromCartCommand request, CancellationToken cancellationToken)
+        var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == request.CartItemId);
+
+        if (cartItem == null)
         {
-            var repository = _unitOfWork.GetRepository<Cart>();
-            var cartSpec = new CartByUserIdSpecification(request.UserId);
-            var cart = await repository.GetBySpecAsync(cartSpec, cancellationToken);
-
-            if (cart == null)
-            {
-                return Result<Unit>.Failure($"Cart for user with UserId {request.UserId} not found");
-            }
-
-            var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == request.CartItemId);
-
-            if (cartItem == null)
-            {
-                return Result<Unit>.Failure($"CartItem with Id {request.CartItemId} not found in the cart");
-            }
-
-            cart.Items.Remove(cartItem);
-
-            await _unitOfWork.SaveChangesAsync();
-
-            return Result<Unit>.Success(Unit.Value);
+            return Result<Unit>.Failure($"CartItem with Id {request.CartItemId} not found in the cart");
         }
+
+        cart.Items.Remove(cartItem);
+
+        await _unitOfWork.SaveChangesAsync();
+
+        return Result<Unit>.Success(Unit.Value);
     }
 }
