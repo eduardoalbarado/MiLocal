@@ -7,7 +7,7 @@ using MediatR;
 namespace Application.Features.Carts.Commands.RemoveFromCart;
 public class RemoveFromCartCommand : IRequest<Result<Unit>>
 {
-    public int CartItemId { get; set; }
+    public int ItemId { get; set; }
 }
 
 public class RemoveFromCartCommandHandler : IRequestHandler<RemoveFromCartCommand, Result<Unit>>
@@ -34,11 +34,11 @@ public class RemoveFromCartCommandHandler : IRequestHandler<RemoveFromCartComman
             return Result<Unit>.Failure($"Cart for user with UserId {userId} not found");
         }
 
-        var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == request.CartItemId);
+        var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == request.ItemId);
 
         if (cartItem == null)
         {
-            return Result<Unit>.Failure($"CartItem with Id {request.CartItemId} not found in the cart");
+            return Result<Unit>.Failure($"CartItem with Id {request.ItemId} not found in the cart");
         }
 
         cart.Items.Remove(cartItem);
