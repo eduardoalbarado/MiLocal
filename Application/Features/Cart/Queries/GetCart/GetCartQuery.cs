@@ -5,30 +5,32 @@ using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.Carts.Queries.GetCart;
-public class GetCartByUserIdQuery : IRequest<Result<CartDto>>
+public class GetCartQuery : IRequest<Result<CartDto>>
 {
-    public GetCartByUserIdQuery()
+    public GetCartQuery()
     {
         UserId = Guid.Empty;
     }
     public Guid UserId { get; set; }
 }
 
-public class GetCartByUserIdQueryHandler : IRequestHandler<GetCartByUserIdQuery, Result<CartDto>>
+public class GetCartQueryHandler : IRequestHandler<GetCartQuery, Result<CartDto>>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IUserContextService _userContextService;
 
-    public GetCartByUserIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, IUserContextService userContextService)
+    public GetCartQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, IUserContextService userContextService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _userContextService = userContextService;
     }
 
-    public async Task<Result<CartDto>> Handle(GetCartByUserIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<CartDto>> Handle(GetCartQuery request, CancellationToken cancellationToken)
     {
+        var datetime = DateTime.Now;
+        var userContext = _userContextService.GetUserContext();
         var userId = Guid.Parse(_userContextService.GetUserContext().UserId);
 
         var repository = _unitOfWork.GetRepository<Cart>();
