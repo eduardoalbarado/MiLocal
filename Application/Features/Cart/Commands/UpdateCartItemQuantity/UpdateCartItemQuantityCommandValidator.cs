@@ -6,9 +6,6 @@ namespace Application.Features.Carts.Commands.UpdateCartItemQuantity
     {
         public UpdateCartItemQuantityCommandValidator()
         {
-            RuleFor(x => x.UserId)
-                .NotEmpty().WithMessage("UserId is required.");
-
             RuleFor(x => x.CartItemId)
                 .NotEmpty().WithMessage("CartItemId is required.")
                 .GreaterThan(0).WithMessage("CartItemId must be greater than 0.");
