@@ -1,3 +1,4 @@
+using Application.Interfaces;
 using FunctionAppApi.Extensions;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using System;
@@ -9,6 +10,12 @@ namespace FunctionAppApi
     public class AuthenticationMiddleware : IFunctionsWorkerMiddleware
     {
         private ILogger _logger;
+        private readonly IUserContextService _userContextService;
+
+        public AuthenticationMiddleware(IUserContextService userContextService)
+        {
+            _userContextService = userContextService;
+        }        
 
         public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
         {
@@ -53,7 +60,7 @@ namespace FunctionAppApi
             }
 
             // Store the user context in the request context for later use
-            context.Items.Add("UserContext", userContext);
+            _userContextService.SetUserContext(userContext);
 
             await next(context);
         }
@@ -65,18 +72,18 @@ namespace FunctionAppApi
             if (string.IsNullOrEmpty(token))
             {
                 // Return mock data if the token is empty or null
-                userId = "123456";
+                userId = "d2b5b44a-f39f-4e42-94c1-7b98e14a3ca8";
                 userName = "John Doe";
-                return new UserContext(userId, userName);
+                return new UserContext(userId, userName, null);
             }
 
             // TODO: Implement token validation and user context retrieval logic
             // Here, you can validate the token and extract the relevant user information
 
             // For simplicity, this implementation returns a dummy user context
-            userId = "123456";
+            userId = "d2b5b44a-f39f-4e42-94c1-7b98e14a3ca8";
             userName = "John Doe";
-            return new UserContext(userId, userName);
+            return new UserContext(userId, userName, null);
         }
     }
 }
