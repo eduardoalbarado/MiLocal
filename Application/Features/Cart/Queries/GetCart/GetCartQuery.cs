@@ -29,8 +29,6 @@ public class GetCartQueryHandler : IRequestHandler<GetCartQuery, Result<CartDto>
 
     public async Task<Result<CartDto>> Handle(GetCartQuery request, CancellationToken cancellationToken)
     {
-        var datetime = DateTime.Now;
-        var userContext = _userContextService.GetUserContext();
         var userId = Guid.Parse(_userContextService.GetUserContext().UserId);
 
         var repository = _unitOfWork.GetRepository<Cart>();
