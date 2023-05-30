@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Threading.Tasks;
 
 namespace FunctionAppApi;
 class Program
@@ -18,7 +19,14 @@ class Program
                 Startup startup = new Startup(context.Configuration);
                 startup.ConfigureServices(services);
             })
-            .ConfigureFunctionsWorkerDefaults()
+            .ConfigureFunctionsWorkerDefaults(builder =>
+            {
+                builder.UseMiddleware<AuthenticationMiddleware>();
+            })
+            .ConfigureServices(services =>
+            {
+                services.AddHttpClient(); // Add any additional services needed for your middleware
+            })
             //.ConfigureOpenApi()
             .Build();
 

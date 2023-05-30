@@ -1,10 +1,11 @@
 ﻿using Application;
+using Application.Interfaces;
+using Application.Services;
 using Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FunctionAppApi;
-
 public class Startup
 {
     private readonly IConfiguration configuration;
@@ -14,9 +15,10 @@ public class Startup
         this.configuration = configuration;
     }
 
-    public void ConfigureServices(IServiceCollection collection)
+    public void ConfigureServices(IServiceCollection services)
     {
-        collection.AddApplication();
-        collection.AddInfrastructure(this.configuration);
+        services.AddApplication();
+        services.AddInfrastructure(configuration);
+        services.AddSingleton<IUserContextService, UserContextService>();
     }
 }

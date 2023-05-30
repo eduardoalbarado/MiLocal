@@ -1,10 +1,10 @@
-﻿using Application.Interfaces;
-using Infrastructure.Persistence.Contexts;
+// // TODO: Update the unit of work implementation to include operations related to the shopping cart.
+using Application.Interfaces;
 using Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace Infrastructure.Persistence;
+namespace Infrastructure.Persistence.Contexts;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly MiLocalDbContext _context;
