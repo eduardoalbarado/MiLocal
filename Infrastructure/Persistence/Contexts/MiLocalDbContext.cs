@@ -1,4 +1,3 @@
-// // TODO: Add the shopping cart entity to the existing database context.
 using Application.Interfaces;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
