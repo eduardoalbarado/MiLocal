@@ -4,7 +4,7 @@ using AutoMapper;
 using Domain.Entities;
 using MediatR;
 
-namespace Application.Features.Checkout.Queries.GetOrderById;
+namespace Application.Features.Orders.Queries.GetOrderById;
 
 public class GetOrderByIdQuery : IRequest<Result<OrderDto>>
 {
@@ -27,7 +27,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Resul
     public async Task<Result<OrderDto>> Handle(GetOrderByIdQuery request, CancellationToken cancellationToken)
     {
         var userId = Guid.Parse(_userContextService.GetUserContext().UserId);
-        
+
         var repository = _unitOfWork.GetRepository<Order>();
         var orderSpec = new OrderByIdSpecification(userId, request.OrderId);
         var order = await repository.GetBySpecAsync(orderSpec, cancellationToken);
