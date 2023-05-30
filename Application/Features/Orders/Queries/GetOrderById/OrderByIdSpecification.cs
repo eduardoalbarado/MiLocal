@@ -1,7 +1,7 @@
 ﻿using Domain.Entities;
 using Ardalis.Specification;
 
-namespace Application.Features.Checkout.Queries.GetOrderById;
+namespace Application.Features.Orders.Queries.GetOrderById;
 public class OrderByIdSpecification : Specification<Order>
 {
     public OrderByIdSpecification(Guid userId, int orderId)
