@@ -12,8 +12,6 @@ public class GeneralProfile : Profile
         #region Commands
         CreateMap<AddToCartDto, AddToCartCommand>();
         CreateMap<AddToCartDto, AddToCartCommand>();
-        CreateMap<CartItem, OrderItemDto>();
-        CreateMap<OrderItemDto, OrderItem>();
         #endregion
         #region Queries
         CreateMap<Product, ProductDto>();
