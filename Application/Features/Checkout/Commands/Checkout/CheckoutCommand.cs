@@ -6,11 +6,11 @@ using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.Checkout.Commands.CreateOrder;
-public class CreateOrderCommand : IRequest<int>
+public class CheckoutCommand : IRequest<int>
 {
 }
 
-public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int>
+public class CreateOrderCommandHandler : IRequestHandler<CheckoutCommand, int>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
@@ -23,7 +23,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int
         _userContextService = userContextService;
     }
 
-    public async Task<int> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(CheckoutCommand request, CancellationToken cancellationToken)
     {
         var userId = Guid.Parse(_userContextService.GetUserContext().UserId);
         var userCart = await GetCartByUserId(userId, cancellationToken);
