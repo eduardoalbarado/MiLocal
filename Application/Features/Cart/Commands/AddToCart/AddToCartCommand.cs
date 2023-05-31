@@ -63,7 +63,7 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, int>
         return cart;
     }
 
-    private CartItem CreateCartItem(Product product, int quantity)
+    private static CartItem CreateCartItem(Product product, int quantity)
     {
         return new CartItem
         {
@@ -74,7 +74,7 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, int>
         };
     }
 
-    private Cart CreateCart(Guid userId)
+    private static Cart CreateCart(Guid userId)
     {
         return new Cart(userId);
     }
