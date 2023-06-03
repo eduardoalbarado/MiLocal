@@ -18,4 +18,7 @@ public class CartItem : BaseEntity
     {
         get { return Subtotal * (1 - Discount); }
     }
+    // Navigation property
+    public virtual Cart Cart { get; set; }
+    public int CartId { get; set; }
 }
