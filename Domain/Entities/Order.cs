@@ -1,7 +1,8 @@
+using Domain.Common;
+
 namespace Domain.Entities;
-public class Order
+public class Order : BaseEntity
 {
-    public int Id { get; set; }
     public int OrderId { get; set; }
     public DateTime OrderDate { get; set; }
     public decimal TotalAmount { get; set; }

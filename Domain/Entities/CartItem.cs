@@ -14,7 +14,7 @@ public class CartItem : BaseEntity
     {
         get { return Price * Quantity; }
     }
-    public decimal DiscountedSubtotal
+    public virtual decimal DiscountedSubtotal
     {
         get { return Subtotal * (1 - Discount); }
     }
