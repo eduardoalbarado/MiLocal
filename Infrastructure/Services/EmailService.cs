@@ -3,7 +3,7 @@ using Application.Interfaces;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.Service;
+namespace Infrastructure.Services;
 public class EmailService : IEmailService
 {
     private readonly ILogger<EmailService> logger;
