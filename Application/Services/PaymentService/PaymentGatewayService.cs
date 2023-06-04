@@ -30,7 +30,7 @@ public class PaymentGatewayService : IPaymentGatewayService
         return paymentStatus;
     }
 
-    public async Task<UpdateTransactionStatusResponse> UpdateTransactionStatus(string transactionId, TransactionStatus newStatus)
+    public async Task<UpdateTransactionStatusResponse> UpdateTransactionStatus(string transactionId, PaymentStatus newStatus)
     {
         // Call the Payment Gateway client to update the transaction status
         var updateResponse = await _paymentGatewayClient.UpdateTransactionStatus(transactionId, newStatus);

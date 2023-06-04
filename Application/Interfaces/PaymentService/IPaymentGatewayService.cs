@@ -28,6 +28,6 @@ namespace Application.Interfaces.PaymentService
         /// <param name="transactionId">The transaction ID.</param>
         /// <param name="newStatus">The new transaction status.</param>
         /// <returns>The updated response from the Payment Gateway.</returns>
-        Task<UpdateTransactionStatusResponse> UpdateTransactionStatus(string transactionId, TransactionStatus newStatus);
+        Task<UpdateTransactionStatusResponse> UpdateTransactionStatus(string transactionId, PaymentStatus newStatus);
     }
 }
