@@ -1,7 +1,9 @@
 ﻿using Application.Interfaces;
+using Application.Interfaces.PaymentService;
 using Infrastructure.Persistence.Contexts;
 using Infrastructure.Repository;
-using Infrastructure.Service;
+using Infrastructure.Services;
+using Infrastructure.Services.PaymentService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +32,7 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddTransient<IEmailService, EmailService>();
         services.AddTransient<IDateTime, DateTimeService>();
+        services.AddTransient<IPaymentGatewayClient, MercadoPagoPaymentGatewayClient>();
 
         return services;
     }
