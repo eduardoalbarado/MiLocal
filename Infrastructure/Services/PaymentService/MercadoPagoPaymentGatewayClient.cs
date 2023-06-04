@@ -22,7 +22,7 @@ public class MercadoPagoPaymentGatewayClient : IPaymentGatewayClient
 
     private void ConfigureMercadoPago()
     {
-        var accessToken = _configuration["MercadoPago:AccessToken"];
+        var accessToken = _configuration.GetValue<string>("MercadoPago:AccessToken");
         var retryStrategy = new DefaultRetryStrategy(2);
         MercadoPagoConfig.AccessToken = accessToken;
         MercadoPagoConfig.RetryStrategy = retryStrategy;
