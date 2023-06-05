@@ -10,8 +10,6 @@ public class GeneralProfile : Profile
     public GeneralProfile()
     {
         #region Commands
-        CreateMap<AddToCartDto, AddToCartCommand>();
-        CreateMap<AddToCartDto, AddToCartCommand>();
         #endregion
         #region Queries
         CreateMap<Product, ProductDto>();
