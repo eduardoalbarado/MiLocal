@@ -2,6 +2,7 @@ using Application.Features.Carts.Commands.AddToCart;
 using Application.Features.Carts.Commands.RemoveFromCart;
 using Application.Features.Carts.Commands.UpdateCartItemQuantity;
 using Application.Features.Carts.Queries.GetCart;
+using Microsoft.OpenApi.Models;
 
 namespace FunctionAppApi.Resources;
 
@@ -54,6 +55,7 @@ public class CartFunction : FunctionBase
 
     [Function("UpdateCartItemQuantity")]
     [OpenApiOperation(operationId: "updateCartItemQuantity", tags: new[] { "Cart" })]
+    [OpenApiParameter(name: "itemId", In = ParameterLocation.Path, Required = true, Type = typeof(int))]
     [OpenApiRequestBody("application/json", typeof(UpdateCartItemQuantityDto))]
     public async Task<IActionResult> UpdateCartItemQuantity(
         [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "cart/items/{itemId}")] HttpRequestData req, int itemId)

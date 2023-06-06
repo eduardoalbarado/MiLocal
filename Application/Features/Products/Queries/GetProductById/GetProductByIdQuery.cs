@@ -2,6 +2,7 @@ using AutoMapper;
 using Application.Common.Models;
 using Domain.Entities;
 using MediatR;
+using Application.Common.Models.Responses;
 
 namespace Application.Features.Products.Queries.GetProductById
 {

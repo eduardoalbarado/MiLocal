@@ -1,4 +1,4 @@
-﻿using Application.Common.Models;
+﻿using Application.Common.Models.Responses;
 using Application.Features.Carts.Queries.GetCartByUserId;
 using Application.Interfaces;
 using Domain.Entities;

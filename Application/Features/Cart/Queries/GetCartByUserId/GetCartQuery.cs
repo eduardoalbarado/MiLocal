@@ -1,4 +1,4 @@
-using Application.Common.Models;
+using Application.Common.Models.Responses;
 using AutoMapper;
 using Domain.Entities;
 using MediatR;
