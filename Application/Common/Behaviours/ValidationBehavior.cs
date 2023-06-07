@@ -2,12 +2,12 @@
 using MediatR;
 
 namespace Application.Common.Behaviours;
-public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
      where TRequest : notnull
 {
     private readonly IEnumerable<IValidator<TRequest>> _validators;
 
-    public ValidationBehaviour(IEnumerable<IValidator<TRequest>> validators)
+    public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
     {
         _validators = validators;
     }
