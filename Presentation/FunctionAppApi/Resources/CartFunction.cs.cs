@@ -62,10 +62,9 @@ public class CartFunction : FunctionBase
     {
         _logger.LogInformation("UpdateCartItemQuantity function processed a request.");
 
-        var updateCartItemQuantityDto = await req.ReadFromJsonAsync<UpdateCartItemQuantityDto>();
-        updateCartItemQuantityDto.CartItemId = itemId;
+        var command = await req.ReadFromJsonAsync<UpdateCartItemQuantityCommand>();
+        command.CartItemId = itemId;
 
-        var command = _mapper.Map<UpdateCartItemQuantityCommand>(updateCartItemQuantityDto);
         var result = await _mediator.Send(command);
 
         return new OkObjectResult(result);
