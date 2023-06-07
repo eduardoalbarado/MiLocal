@@ -40,7 +40,12 @@ public class ExceptionMiddleware : IFunctionsWorkerMiddleware
             else
             {
                 // Handle general exception
-                var errorResponse = new ErrorResponse("An error occurred while processing the request.");
+                string message = $"An error occurred while processing the request.";
+
+                #if DEBUG
+                message += $" Debug Message: {ex.Message}";
+                #endif
+                var errorResponse = new ErrorResponse(message);
 
                 await context.CreateJsonResponse(HttpStatusCode.InternalServerError, errorResponse);
             }
