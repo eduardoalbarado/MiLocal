@@ -2,7 +2,6 @@ using Application.Features.Carts.Commands.AddToCart;
 using Application.Features.Carts.Commands.RemoveFromCart;
 using Application.Features.Carts.Commands.UpdateCartItemQuantity;
 using Application.Features.Carts.Queries.GetCart;
-using Microsoft.OpenApi.Models;
 
 namespace FunctionAppApi.Resources;
 
