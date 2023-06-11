@@ -1,6 +1,4 @@
 ﻿using Application.Common.Models;
-using Application.Features.Carts.Commands.AddToCart;
-using Application.Features.Checkout.Commands.CreateOrder;
 using AutoMapper;
 using Domain.Entities;
 
