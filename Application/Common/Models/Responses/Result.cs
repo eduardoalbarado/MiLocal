@@ -1,4 +1,4 @@
-﻿namespace Application.Common.Models;
+﻿namespace Application.Common.Models.Responses;
 public class Result<T>
 {
     public bool IsSuccess { get; }
@@ -17,8 +17,8 @@ public class Result<T>
         return new Result<T>(true, data, null);
     }
 
-    public static Result<T> Failure(string errorMessage)
+    public static Result<T> Failure(string errorMessage, T data = default)
     {
-        return new Result<T>(false, default, errorMessage);
+        return new Result<T>(false, data, errorMessage);
     }
 }

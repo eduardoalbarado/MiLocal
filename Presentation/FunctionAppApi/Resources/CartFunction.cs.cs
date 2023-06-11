@@ -54,16 +54,16 @@ public class CartFunction : FunctionBase
 
     [Function("UpdateCartItemQuantity")]
     [OpenApiOperation(operationId: "updateCartItemQuantity", tags: new[] { "Cart" })]
+    [OpenApiParameter(name: "itemId", In = ParameterLocation.Path, Required = true, Type = typeof(int))]
     [OpenApiRequestBody("application/json", typeof(UpdateCartItemQuantityDto))]
     public async Task<IActionResult> UpdateCartItemQuantity(
         [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "cart/items/{itemId}")] HttpRequestData req, int itemId)
     {
         _logger.LogInformation("UpdateCartItemQuantity function processed a request.");
 
-        var updateCartItemQuantityDto = await req.ReadFromJsonAsync<UpdateCartItemQuantityDto>();
-        updateCartItemQuantityDto.CartItemId = itemId;
+        var command = await req.ReadFromJsonAsync<UpdateCartItemQuantityCommand>();
+        command.CartItemId = itemId;
 
-        var command = _mapper.Map<UpdateCartItemQuantityCommand>(updateCartItemQuantityDto);
         var result = await _mediator.Send(command);
 
         return new OkObjectResult(result);

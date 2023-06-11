@@ -1,4 +1,4 @@
-using Application.Common.Models;
+using Application.Common.Models.Responses;
 using Application.Features.Carts.Queries.GetCartByUserId;
 using Application.Interfaces;
 using Domain.Entities;
@@ -8,6 +8,7 @@ namespace Application.Features.Carts.Commands.UpdateCartItemQuantity;
 
 public class UpdateCartItemQuantityCommand : UpdateCartItemQuantityDto, IRequest<Result<Unit>>
 {
+    public int CartItemId { get; set; }
 }
 
 public class UpdateCartItemQuantityCommandHandler : IRequestHandler<UpdateCartItemQuantityCommand, Result<Unit>>

@@ -2,10 +2,9 @@ using Application.Interfaces;
 using FunctionAppApi.Extensions;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
-namespace FunctionAppApi
+namespace FunctionAppApi.Middleware
 {
     public class AuthenticationMiddleware : IFunctionsWorkerMiddleware
     {
@@ -15,7 +14,7 @@ namespace FunctionAppApi
         public AuthenticationMiddleware(IUserContextService userContextService)
         {
             _userContextService = userContextService;
-        }        
+        }
 
         public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
         {

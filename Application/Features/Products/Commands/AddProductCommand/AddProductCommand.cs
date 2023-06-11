@@ -1,6 +1,6 @@
-﻿using Domain.Entities;
+﻿using AutoMapper;
+using Domain.Entities;
 using MediatR;
-using AutoMapper;
 
 namespace Application.Features.Products.Commands.AddProduct
 {

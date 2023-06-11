@@ -1,7 +1,7 @@
-﻿using AutoMapper;
+﻿using Application.Common.Models;
 using Application.Features.Products.Commands.AddProduct;
+using AutoMapper;
 using Domain.Entities;
-using Application.Common.Models;
 
 namespace Application.MappingProfiles
 {
@@ -11,6 +11,7 @@ namespace Application.MappingProfiles
         {
             CreateMap<Product, ProductDto>();
             CreateMap<AddProductCommand, Product>();
+            CreateMap<AddProductDto, AddProductCommand>();
         }
     }
 }

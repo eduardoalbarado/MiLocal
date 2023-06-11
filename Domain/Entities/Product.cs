@@ -13,4 +13,5 @@ public class Product : BaseEntity
     public bool Enabled { get; set; }
     public bool Kit { get; set; }
     public virtual ICollection<ProductCategory>? ProductCategories { get; set; }
+    public virtual ICollection<ProductImage> Images { get; set; }
 }
