@@ -1,5 +1,5 @@
-﻿using Domain.Entities;
-using Ardalis.Specification;
+﻿using Ardalis.Specification;
+using Domain.Entities;
 
 namespace Application.Features.Products.Queries.GetCategoryProducts;
 public class ProductPagedSpecifications : Specification<Product>

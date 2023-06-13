@@ -2,9 +2,6 @@ using Application.Common.Models;
 using AutoMapper;
 using Domain.Entities;
 using MediatR;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Products.Queries.GetCategoryProducts;
 
