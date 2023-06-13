@@ -26,7 +26,7 @@ public class MercadoPagoPaymentGatewayClient : IPaymentGatewayClient
         var retryStrategy = new DefaultRetryStrategy(2);
         MercadoPagoConfig.AccessToken = accessToken;
         MercadoPagoConfig.RetryStrategy = retryStrategy;
-        }
+    }
 
     public async Task<PaymentGatewayResponse> ProcessPaymentAsync(PaymentGatewayRequest request)
     {
