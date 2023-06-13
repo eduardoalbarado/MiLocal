@@ -9,7 +9,7 @@ namespace FunctionAppApi.Resources
     public class ProductsFunction : FunctionBase
     {
         public ProductsFunction(ILogger<ProductsFunction> logger, IMediator mediator, IMapper mapper)
-            :base(logger, mediator, mapper)
+            : base(logger, mediator, mapper)
         {
         }
 
@@ -45,7 +45,7 @@ namespace FunctionAppApi.Resources
         {
             _logger.LogInformation("AddProduct function processed a request.");
 
-            var addProductDto= await req.ReadFromJsonAsync<AddProductDto>();
+            var addProductDto = await req.ReadFromJsonAsync<AddProductDto>();
             var command = _mapper.Map<AddProductCommand>(addProductDto);
             var result = await _mediator.Send(command);
 

@@ -4,7 +4,6 @@ using FunctionAppApi.Extensions;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using System;
 using System.Collections.Generic;
-using System.Text.Json;
 
 namespace FunctionAppApi.Middleware;
 
@@ -42,9 +41,9 @@ public class ExceptionMiddleware : IFunctionsWorkerMiddleware
                 // Handle general exception
                 string message = $"An error occurred while processing the request.";
 
-                #if DEBUG
+#if DEBUG
                 message += $" Debug Message: {ex.Message}";
-                #endif
+#endif
                 var errorResponse = new ErrorResponse(message);
 
                 await context.CreateJsonResponse(HttpStatusCode.InternalServerError, errorResponse);
