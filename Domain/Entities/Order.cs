@@ -10,7 +10,7 @@ public class Order : BaseEntity
     public string CustomerEmail { get; set; }
     public string ShippingAddress { get; set; }
     public Guid UserId { get; set; }
-    
+
     public virtual List<OrderItem> OrderItems { get; set; }
 
     public Order()
