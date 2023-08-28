@@ -19,4 +19,5 @@ public class Cart : BaseEntity
         UserId = userId;
         Items = new List<CartItem>();
     }
+    public User User { get; set; }
 }

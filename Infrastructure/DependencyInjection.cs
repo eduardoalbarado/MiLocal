@@ -13,6 +13,9 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        string environment = configuration.GetValue<string>("AZURE_FUNCTIONS_ENVIRONMENT") ?? "Development";
+        bool isDevEnvironment = environment.Equals("Development", StringComparison.OrdinalIgnoreCase);
+
         services.AddTransient<IDateTime, DateTimeService>();
 
         if (configuration.GetValue<bool>("UseInMemoryDatabase"))
@@ -23,7 +26,7 @@ public static class DependencyInjection
         else
         {
             services.AddDbContext<MiLocalDbContext>(options =>
-                options.UseSqlite("Data Source=Data\\MiLocalDb.db"));
+                options.UseSqlite($"Data Source={(isDevEnvironment ? "Data\\MiLocalDb.db" : "C:/home/MiLocalDb.db")}"));
         }
         services.AddScoped<IDbContext>(provider => provider.GetRequiredService<IDbContext>());
         // Registering the repositories

@@ -12,6 +12,8 @@ public class Product : BaseEntity
     public decimal CostInDollars { get; set; }
     public bool Enabled { get; set; }
     public bool Kit { get; set; }
+
+    public ICollection<Category> Categories { get; set; }
     public virtual ICollection<ProductCategory>? ProductCategories { get; set; }
     public virtual ICollection<ProductImage> Images { get; set; }
 }

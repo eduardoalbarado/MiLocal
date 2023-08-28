@@ -1,3 +1,4 @@
+using Application.Common.Models.Responses;
 using Application.Features.Products.Commands.AddProduct;
 using Application.Features.Products.Commands.DeleteProduct;
 using Application.Features.Products.Commands.UpdateProduct;
@@ -9,7 +10,7 @@ namespace FunctionAppApi.Resources
     public class ProductsFunction : FunctionBase
     {
         public ProductsFunction(ILogger<ProductsFunction> logger, IMediator mediator, IMapper mapper)
-            :base(logger, mediator, mapper)
+            : base(logger, mediator, mapper)
         {
         }
 
@@ -27,7 +28,9 @@ namespace FunctionAppApi.Resources
 
         [Function("GetProductById")]
         [OpenApiOperation(operationId: "GetProductById", tags: new[] { "Products" })]
-        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
+        [OpenApiParameter(name: "id", In = ParameterLocation.Path, Required = true, Type = typeof(int), Description = "The ID of the product")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(ProductDto), Description = "The OK response")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.NotFound, contentType: "text/plain", bodyType: typeof(NotFoundResponse), Description = "Product not found")]
         public async Task<IActionResult> GetProductById(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "products/{id}")] HttpRequestData req, int id)
         {
@@ -40,20 +43,24 @@ namespace FunctionAppApi.Resources
         [Function("AddProduct")]
         [OpenApiOperation(operationId: "AddProduct", tags: new[] { "Products" })]
         [OpenApiRequestBody("application/json", typeof(AddProductDto))]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(Result<ProductDto>), Description = "The OK response with added product details.")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.BadRequest, contentType: "application/json", bodyType: typeof(ErrorResponse), Description = "Bad request when the product data is invalid.")]
         public async Task<IActionResult> AddProduct(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "products")] HttpRequestData req)
         {
             _logger.LogInformation("AddProduct function processed a request.");
 
-            var addProductDto= await req.ReadFromJsonAsync<AddProductDto>();
+            var addProductDto = await req.ReadFromJsonAsync<AddProductDto>();
             var command = _mapper.Map<AddProductCommand>(addProductDto);
             var result = await _mediator.Send(command);
 
             return new OkObjectResult(result);
         }
 
-        [Function("DeleteProduct")]
         [OpenApiOperation(operationId: "DeleteProduct", tags: new[] { "Products" })]
+        [OpenApiParameter(name: "id", In = ParameterLocation.Path, Required = true, Type = typeof(int), Description = "The ID of the product")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(Result<string>), Description = "The OK response")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.NotFound, contentType: "text/plain", bodyType: typeof(NotFoundResponse), Description = "Product not found")]
         public async Task<IActionResult> DeleteProduct(
             [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "products/{id}")] HttpRequestData req, int id)
         {
@@ -69,6 +76,9 @@ namespace FunctionAppApi.Resources
         [Function("UpdateProduct")]
         [OpenApiOperation(operationId: "UpdateProduct", tags: new[] { "Products" })]
         [OpenApiRequestBody("application/json", typeof(UpdateProductDto))]
+        [OpenApiParameter(name: "id", In = ParameterLocation.Path, Required = true, Type = typeof(int), Description = "The ID of the product")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(ProductDto), Description = "The OK response")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.NotFound, contentType: "text/plain", bodyType: typeof(NotFoundResponse), Description = "Product not found")]
         public async Task<IActionResult> UpdateProduct(
             [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "products/{id}")] HttpRequestData req, int id)
         {

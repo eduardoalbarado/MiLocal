@@ -1,5 +1,5 @@
 ﻿using FunctionAppApi.Middleware;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.Azure.Functions.Worker.Extensions.OpenApi.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,7 +29,7 @@ class Program
             {
                 services.AddHttpClient(); // Add any additional services needed for your middleware
             })
-            //.ConfigureOpenApi()
+            .ConfigureOpenApi()
             .Build();
 
         await host.RunAsync();

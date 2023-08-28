@@ -1,10 +1,9 @@
 ﻿using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Abstractions;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
-using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 
-namespace FunctionApp1.OpenApi;
+namespace FunctionAppApi.OpenApi;
 
 public class OpenApiConfigurationOptions : IOpenApiConfigurationOptions
 {
