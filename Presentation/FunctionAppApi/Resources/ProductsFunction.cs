@@ -57,8 +57,10 @@ namespace FunctionAppApi.Resources
             return new OkObjectResult(result);
         }
 
-        [Function("DeleteProduct")]
         [OpenApiOperation(operationId: "DeleteProduct", tags: new[] { "Products" })]
+        [OpenApiParameter(name: "id", In = ParameterLocation.Path, Required = true, Type = typeof(int), Description = "The ID of the product")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(Result<string>), Description = "The OK response")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.NotFound, contentType: "text/plain", bodyType: typeof(NotFoundResponse), Description = "Product not found")]
         public async Task<IActionResult> DeleteProduct(
             [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "products/{id}")] HttpRequestData req, int id)
         {

@@ -1,4 +1,5 @@
 using Application.Common.Models.Responses;
+using Application.Exceptions;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
@@ -37,7 +38,7 @@ public class GetCartQueryHandler : IRequestHandler<GetCartQuery, Result<CartDto>
 
         if (cart == null)
         {
-            return Result<CartDto>.Failure($"Cart for user with UserId {userId} not found");
+            throw new NotFoundException("Cart", userId);
         }
 
         var cartDto = _mapper.Map<CartDto>(cart);
