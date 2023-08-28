@@ -76,6 +76,9 @@ namespace FunctionAppApi.Resources
         [Function("UpdateProduct")]
         [OpenApiOperation(operationId: "UpdateProduct", tags: new[] { "Products" })]
         [OpenApiRequestBody("application/json", typeof(UpdateProductDto))]
+        [OpenApiParameter(name: "id", In = ParameterLocation.Path, Required = true, Type = typeof(int), Description = "The ID of the product")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(ProductDto), Description = "The OK response")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.NotFound, contentType: "text/plain", bodyType: typeof(NotFoundResponse), Description = "Product not found")]
         public async Task<IActionResult> UpdateProduct(
             [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "products/{id}")] HttpRequestData req, int id)
         {
