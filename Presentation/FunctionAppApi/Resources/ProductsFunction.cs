@@ -1,3 +1,4 @@
+using Application.Common.Models.Responses;
 using Application.Features.Products.Commands.AddProduct;
 using Application.Features.Products.Commands.DeleteProduct;
 using Application.Features.Products.Commands.UpdateProduct;
@@ -27,7 +28,9 @@ namespace FunctionAppApi.Resources
 
         [Function("GetProductById")]
         [OpenApiOperation(operationId: "GetProductById", tags: new[] { "Products" })]
-        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
+        [OpenApiParameter(name: "id", In = ParameterLocation.Path, Required = true, Type = typeof(int), Description = "The ID of the product")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(ProductDto), Description = "The OK response")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.NotFound, contentType: "text/plain", bodyType: typeof(NotFoundResponse), Description = "Product not found")]
         public async Task<IActionResult> GetProductById(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "products/{id}")] HttpRequestData req, int id)
         {
