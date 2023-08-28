@@ -43,6 +43,8 @@ namespace FunctionAppApi.Resources
         [Function("AddProduct")]
         [OpenApiOperation(operationId: "AddProduct", tags: new[] { "Products" })]
         [OpenApiRequestBody("application/json", typeof(AddProductDto))]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(Result<ProductDto>), Description = "The OK response with added product details.")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.BadRequest, contentType: "application/json", bodyType: typeof(ErrorResponse), Description = "Bad request when the product data is invalid.")]
         public async Task<IActionResult> AddProduct(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "products")] HttpRequestData req)
         {
