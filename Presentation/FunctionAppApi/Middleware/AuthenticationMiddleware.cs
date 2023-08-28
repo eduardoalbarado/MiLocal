@@ -1,8 +1,13 @@
 using Application.Interfaces;
 using FunctionAppApi.Extensions;
 using Microsoft.Azure.Functions.Worker.Middleware;
+using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 
 namespace FunctionAppApi.Middleware
 {
@@ -10,10 +15,12 @@ namespace FunctionAppApi.Middleware
     {
         private ILogger _logger;
         private readonly IUserContextService _userContextService;
+        private readonly bool _isDebug;
 
         public AuthenticationMiddleware(IUserContextService userContextService)
         {
             _userContextService = userContextService;
+            _isDebug = Environment.GetEnvironmentVariable("AzureWebJobsScriptRoot") != null;
         }
 
         public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
@@ -35,19 +42,31 @@ namespace FunctionAppApi.Middleware
             // Check if the request contains the authorization header
             if (!req.Headers.TryGetValues("Authorization", out var authorization) || !authorization.Any())
             {
-                ////TODO: Add a bypass for Debugging or Loca running to allow work without token
-                //var response = req.CreateResponse(HttpStatusCode.Unauthorized);
-                //response.Headers.Add("Content-Type", "text/plain");
-                //await response.WriteStringAsync("You must provide valid credentials to access this resource.");
-                //context.SendResponseAsync(response);
-                //return;
+                if (!_isDebug)
+                {
+                    var response = req.CreateResponse(HttpStatusCode.Unauthorized);
+                    response.Headers.Add("Content-Type", "text/plain");
+                    await response.WriteStringAsync("You must provide valid credentials to access this resource.");
+                    context.SendResponseAsync(response);
+                    return;
+                }
             }
 
             // Get the token from the authorization header
             var token = authorization?.First().Replace("Bearer ", "") ?? string.Empty;
 
-            // TODO: Validate the token and retrieve the user context
-            var userContext = GetUserContextFromToken(token);
+            UserContext userContext;
+
+            if (_isDebug)
+            {
+                // In debug mode, directly extract claims from the token
+                userContext = GetUserContextFromDebugToken(token);
+            }
+            else
+            {
+                // In normal mode, validate the token and retrieve the user context
+                userContext = GetUserContextFromToken(token);
+            }
 
             if (userContext == null)
             {
@@ -64,25 +83,86 @@ namespace FunctionAppApi.Middleware
             await next(context);
         }
 
-        private UserContext GetUserContextFromToken(string token)
+        private UserContext GetUserContextFromDebugToken(string token)
         {
-            string userId;
-            string userName;
-            if (string.IsNullOrEmpty(token))
+            try
             {
-                // Return mock data if the token is empty or null
-                userId = "d2b5b44a-f39f-4e42-94c1-7b98e14a3ca8";
-                userName = "John Doe";
-                return new UserContext(userId, userName, null);
+                var tokenHandler = new JwtSecurityTokenHandler();
+
+                // Parse the token without validation in debug mode
+                if (tokenHandler.CanReadToken(token))
+                {
+                    var claimsPrincipal = tokenHandler.ReadJwtToken(token);
+
+                    // Extract user information from the claims
+                    string userId = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == "sub")?.Value;
+                    string userName = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name)?.Value;
+                    string userEmail = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value;
+                    string userRole = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role)?.Value;
+
+                    if (string.IsNullOrEmpty(userId))
+                    {
+                        return null;
+                    }
+
+                    // Create and return the user context
+                    return new UserContext(userId, userName, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle token parsing exceptions
+                _logger.LogError(ex, "Error parsing debug token.");
             }
 
-            // TODO: Implement token validation and user context retrieval logic
-            // Here, you can validate the token and extract the relevant user information
+            return null;
+        }
 
-            // For simplicity, this implementation returns a dummy user context
-            userId = "d2b5b44a-f39f-4e42-94c1-7b98e14a3ca8";
-            userName = "John Doe";
-            return new UserContext(userId, userName, null);
+        public static UserContext GetUserContextFromToken(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+            {
+                return null;
+            }
+
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var validationParameters = new TokenValidationParameters
+                {
+                    // Set your validation parameters here (issuer, audience, etc.)
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidIssuer = "tu_issuer",
+                    ValidAudience = "tu_audience",
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("secret_key_mockup")),
+                    ClockSkew = TimeSpan.Zero // Opcionalmente, puedes ajustar el tiempo de tolerancia
+                };
+
+                // Validate and parse the token
+                ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
+
+                // Extract user information from the claims
+                string userId = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == "sub")?.Value;
+                string userName = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name)?.Value;
+                string userEmail = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value;
+                string userRole = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role)?.Value;
+
+                if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(userName))
+                {
+                    return null;
+                }
+
+                // Create and return the user context
+                return new UserContext(userId, userName, null);
+            }
+            catch (Exception ex)
+            {
+                // Handle token validation exceptions
+                // Log the error if needed
+                return null;
+            }
         }
     }
 }
