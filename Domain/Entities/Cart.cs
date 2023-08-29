@@ -6,6 +6,7 @@ public class Cart : BaseEntity
     public Guid UserId { get; set; }
     public List<CartItem> Items { get; set; }
     public decimal TotalPrice { get; set; }
+    public DateTime LastModified { get; set; }
     public virtual decimal Total
     {
         get { return Items.Sum(item => item.DiscountedSubtotal); }
@@ -18,6 +19,7 @@ public class Cart : BaseEntity
     {
         UserId = userId;
         Items = new List<CartItem>();
+        LastModified = DateTime.UtcNow;
     }
     public User User { get; set; }
 }
