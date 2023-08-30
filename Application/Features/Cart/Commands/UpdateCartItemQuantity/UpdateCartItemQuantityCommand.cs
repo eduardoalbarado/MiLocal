@@ -43,6 +43,7 @@ public class UpdateCartItemQuantityCommandHandler : IRequestHandler<UpdateCartIt
         }
 
         cartItem.Quantity = request.Quantity;
+        cart.LastModified = DateTime.UtcNow;
 
         await _unitOfWork.SaveChangesAsync();
 

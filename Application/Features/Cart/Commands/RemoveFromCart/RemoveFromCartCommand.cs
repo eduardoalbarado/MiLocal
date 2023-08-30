@@ -42,7 +42,7 @@ public class RemoveFromCartCommandHandler : IRequestHandler<RemoveFromCartComman
         }
 
         cart.Items.Remove(cartItem);
-
+        cart.LastModified = DateTime.UtcNow;
         await _unitOfWork.SaveChangesAsync();
 
         return Result<Unit>.Success(Unit.Value);

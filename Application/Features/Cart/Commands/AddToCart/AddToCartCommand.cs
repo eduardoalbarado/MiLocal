@@ -30,6 +30,7 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, int>
         var cartItem = CreateCartItem(product, request.Quantity);
 
         cart.Items.Add(cartItem);
+        cart.LastModified = DateTime.UtcNow;
         await _unitOfWork.SaveChangesAsync();
 
         return cartItem.Id;
