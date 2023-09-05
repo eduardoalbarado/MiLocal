@@ -10,6 +10,7 @@ public class Product : BaseEntity
     public decimal PriceInDollars { get; set; }
     public decimal Cost { get; set; }
     public decimal CostInDollars { get; set; }
+    public int StockQuantity { get; set; }
     public bool Enabled { get; set; }
     public bool Kit { get; set; }
 
