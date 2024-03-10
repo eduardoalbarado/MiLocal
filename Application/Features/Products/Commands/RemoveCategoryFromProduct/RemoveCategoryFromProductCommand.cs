@@ -1,4 +1,5 @@
 using Application.Exceptions;
+using Application.Features.Categories.Queries.GetCategories;
 using AutoMapper;
 using Domain.Entities;
 using MediatR;
@@ -25,21 +26,27 @@ public class RemoveCategoryFromProductCommandHandler : IRequestHandler<RemoveCat
     public async Task<Unit> Handle(RemoveCategoryFromProductCommand request, CancellationToken cancellationToken)
     {
         var repository = _unitOfWork.GetRepository<Product>();
-        var product = await repository.GetByIdAsync(request.ProductId);
+        var product = await repository.GetByIdAsync(request.ProductId, cancellationToken);
         if (product == null)
         {
             throw new NotFoundException("Product", request.ProductId);
         }
 
         var categoryRepository = _unitOfWork.GetRepository<Category>();
-        var category = await categoryRepository.GetByIdAsync(request.CategoryId);
+        var category = await categoryRepository.GetByIdAsync(request.CategoryId, cancellationToken);
         if (category == null)
         {
             throw new NotFoundException("Category", request.CategoryId);
         }
 
-        product.Categories.Remove(category);
-        await _unitOfWork.SaveChangesAsync();
+        var productCategoryRepository = _unitOfWork.GetRepository<ProductCategory>();
+        var spec = new ProductCategorySpecifications(request.ProductId, request.CategoryId);
+        var productCategoryToDelete = await productCategoryRepository.FirstOrDefaultAsync(spec, cancellationToken);
+        if (productCategoryToDelete is not null)
+        {
+            await productCategoryRepository.DeleteAsync(productCategoryToDelete, cancellationToken);
+            await _unitOfWork.SaveChangesAsync();
+        }
 
         return Unit.Value;
     }

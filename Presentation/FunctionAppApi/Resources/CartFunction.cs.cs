@@ -3,6 +3,7 @@ using Application.Features.Carts.Commands.RemoveFromCart;
 using Application.Features.Carts.Commands.UpdateCartItemQuantity;
 using Application.Features.Carts.Queries.GetCart;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
+using System.Net.Http;
 
 namespace FunctionAppApi.Resources;
 
@@ -20,13 +21,16 @@ public class CartFunction : FunctionBase
         Scheme = OpenApiSecuritySchemeType.Bearer,
         BearerFormat = "JWT")]
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
-    public async Task<IActionResult> GetCart(
+    public async Task<HttpResponseData> GetCartAsync(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "cart")] HttpRequestData req)
     {
-        _logger.LogInformation($"Call to {nameof(GetCart)}");
+        _logger.LogInformation($"Call to {nameof(GetCartAsync)}");
         var result = await _mediator.Send(new GetCartQuery());
 
-        return new OkObjectResult(result);
+        var response = req.CreateResponse(HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(result);
+
+        return response;
     }
 
     [Function("AddToCart")]

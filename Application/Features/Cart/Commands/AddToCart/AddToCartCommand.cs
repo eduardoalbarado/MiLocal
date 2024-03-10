@@ -1,3 +1,4 @@
+using Application.Common.Models.Responses;
 using Application.Exceptions;
 using Application.Features.Carts.Queries.GetCartByUserId;
 using Application.Interfaces;
@@ -6,11 +7,11 @@ using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.Carts.Commands.AddToCart;
-public class AddToCartCommand : AddToCartDto, IRequest<int>
+public class AddToCartCommand : AddToCartDto, IRequest<Result<int>>
 {
 }
 
-public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, int>
+public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, Result<int>>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
@@ -23,16 +24,27 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, int>
         _userContextService = userContextService;
     }
 
-    public async Task<int> Handle(AddToCartCommand request, CancellationToken cancellationToken)
+    public async Task<Result<int>> Handle(AddToCartCommand request, CancellationToken cancellationToken)
     {
         var product = await GetProductById(request.ProductId);
         var cart = await GetOrCreateCart(cancellationToken);
         var cartItem = CreateCartItem(product, request.Quantity);
 
+        if (product.StockQuantity < cartItem.Quantity)
+        {
+            return Result<int>.Failure("Insufficient stock for the requested quantity.");
+        }
+
         cart.Items.Add(cartItem);
+        cart.LastModified = DateTime.UtcNow;
+
+        product.StockQuantity -= cartItem.Quantity;
+
+        await UpdateCart(cart, cancellationToken);
+        await UpdateProduct(product, cancellationToken);
         await _unitOfWork.SaveChangesAsync();
 
-        return cartItem.Id;
+        return Result<int>.Success(cartItem.Id);
     }
 
     private async Task<Product> GetProductById(int productId)
@@ -51,16 +63,29 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, int>
     {
         var userId = Guid.Parse(_userContextService.GetUserContext().UserId);
         var cartRepository = _unitOfWork.GetRepository<Cart>();
-        var cartSpec = new CartByUserIdSpecification(userId);
-        var cart = await cartRepository.GetBySpecAsync(cartSpec, cancellationToken);
+        var cartSpecification = new CartByUserIdSpecification(userId);
+        var cart = await cartRepository.FirstOrDefaultAsync(cartSpecification, cancellationToken);
 
         if (cart == null)
         {
             cart = CreateCart(userId);
+
             await cartRepository.AddAsync(cart, cancellationToken);
         }
 
         return cart;
+    }
+
+    private async Task UpdateCart(Cart cart, CancellationToken cancellationToken)
+    {
+        var cartRepository = _unitOfWork.GetRepository<Cart>();
+        await cartRepository.UpdateAsync(cart, cancellationToken);
+    }
+
+    private async Task UpdateProduct(Product product, CancellationToken cancellationToken)
+    {
+        var cartRepository = _unitOfWork.GetRepository<Product>();
+        await cartRepository.UpdateAsync(product, cancellationToken);
     }
 
     private static CartItem CreateCartItem(Product product, int quantity)

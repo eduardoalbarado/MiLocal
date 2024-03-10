@@ -34,8 +34,13 @@ public class AssignCategoryToProductCommandHandler : IRequestHandler<AssignCateg
         {
             throw new NotFoundException("Category", request.CategoryId);
         }
-
-        product.Categories.Add(category);
+        var productCategoryRepository = _unitOfWork.GetRepository<ProductCategory>();
+        var productCategory = new ProductCategory
+        {
+            ProductId = request.ProductId,
+            CategoryId = request.CategoryId
+        };
+        await productCategoryRepository.AddAsync(productCategory, cancellationToken);
         await _unitOfWork.SaveChangesAsync();
 
         return Unit.Value;

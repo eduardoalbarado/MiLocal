@@ -1,10 +1,12 @@
 using Application.Common.Models.Responses;
+using Application.Exceptions;
 using Application.Features.Carts.Queries.GetCartByUserId;
 using Application.Interfaces;
 using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.Carts.Commands.RemoveFromCart;
+
 public class RemoveFromCartCommand : IRequest<Result<Unit>>
 {
     public int ItemId { get; set; }
@@ -23,28 +25,68 @@ public class RemoveFromCartCommandHandler : IRequestHandler<RemoveFromCartComman
 
     public async Task<Result<Unit>> Handle(RemoveFromCartCommand request, CancellationToken cancellationToken)
     {
-        var userId = Guid.Parse(_userContextService.GetUserContext().UserId);
-
-        var repository = _unitOfWork.GetRepository<Cart>();
-        var cartSpec = new CartByUserIdSpecification(userId);
-        var cart = await repository.GetBySpecAsync(cartSpec, cancellationToken);
-
-        if (cart == null)
+        try
         {
-            return Result<Unit>.Failure($"Cart for user with UserId {userId} not found");
-        }
+            var userId = Guid.Parse(_userContextService.GetUserContext().UserId);
+            var cart = await GetCartForUser(userId, cancellationToken);
+            var cartItem = GetCartItemById(cart, request.ItemId);
 
-        var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == request.ItemId);
+            var product = await GetProductForCartItem(cartItem, cancellationToken);
+
+            UpdateProductStock(product, cartItem.Quantity);
+            RemoveCartItemFromCart(cart, cartItem);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return Result<Unit>.Success(Unit.Value);
+        }
+        catch (Exception ex)
+        {
+            // TODO Log a failure.
+            return Result<Unit>.Failure($"An error occurred: {ex.Message}");
+        }
+    }
+
+    private async Task<Cart> GetCartForUser(Guid userId, CancellationToken cancellationToken)
+    {
+        var cartRepository = _unitOfWork.GetRepository<Cart>();
+        var cartSpec = new CartByUserIdSpecification(userId);
+        return await cartRepository.GetBySpecAsync(cartSpec, cancellationToken);
+    }
+
+    private CartItem GetCartItemById(Cart cart, int itemId)
+    {
+        var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == itemId);
 
         if (cartItem == null)
         {
-            return Result<Unit>.Failure($"CartItem with Id {request.ItemId} not found in the cart");
+            throw new NotFoundException($"CartItem with Id {itemId} not found in the cart");
         }
 
+        return cartItem;
+    }
+
+    private async Task<Product> GetProductForCartItem(CartItem cartItem, CancellationToken cancellationToken)
+    {
+        var productRepository = _unitOfWork.GetRepository<Product>();
+        var product = await productRepository.GetByIdAsync(cartItem.ProductId, cancellationToken);
+
+        if (product == null)
+        {
+            throw new NotFoundException($"Product with Id {cartItem.ProductId} not found");
+        }
+
+        return product;
+    }
+
+    private void UpdateProductStock(Product product, int quantity)
+    {
+        product.StockQuantity += quantity;
+    }
+
+    private void RemoveCartItemFromCart(Cart cart, CartItem cartItem)
+    {
         cart.Items.Remove(cartItem);
-
-        await _unitOfWork.SaveChangesAsync();
-
-        return Result<Unit>.Success(Unit.Value);
+        cart.LastModified = DateTime.UtcNow;
     }
 }

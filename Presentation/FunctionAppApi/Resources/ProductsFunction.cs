@@ -2,6 +2,7 @@ using Application.Common.Models.Responses;
 using Application.Features.Products.Commands.AddProduct;
 using Application.Features.Products.Commands.DeleteProduct;
 using Application.Features.Products.Commands.UpdateProduct;
+using Application.Features.Products.Commands.UpdateStock;
 using Application.Features.Products.Queries.GetProductById;
 using Application.Features.Products.Queries.GetProducts;
 
@@ -87,6 +88,28 @@ namespace FunctionAppApi.Resources
             var updateProductDto = await req.ReadFromJsonAsync<UpdateProductDto>();
             var command = _mapper.Map<UpdateProductCommand>(updateProductDto);
             command.Id = id;
+
+            var result = await _mediator.Send(command);
+
+            return new OkObjectResult(result);
+        }
+        [Function("UpdateProductStock")]
+        [OpenApiOperation(operationId: "UpdateProductStock", tags: new[] { "Products" })]
+        [OpenApiParameter(name: "id", In = ParameterLocation.Path, Required = true, Type = typeof(int), Description = "The ID of the product")]
+        [OpenApiRequestBody("application/json", typeof(UpdateStockDto))]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(Result<string>), Description = "The OK response")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.NotFound, contentType: "text/plain", bodyType: typeof(NotFoundResponse), Description = "Product not found")]
+        public async Task<IActionResult> UpdateProductStock(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "products/{id}/stock")] HttpRequestData req, int id)
+        {
+            _logger.LogInformation($"UpdateProductStock function processed a request for Id: {id}");
+
+            var updateStockDto = await req.ReadFromJsonAsync<UpdateStockDto>();
+            var command = new UpdateStockCommand
+            {
+                ProductId = id,
+                NewStockQuantity = updateStockDto.NewStockQuantity
+            };
 
             var result = await _mediator.Send(command);
 
