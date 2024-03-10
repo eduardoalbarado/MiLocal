@@ -103,7 +103,8 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, Result<
             ProductId = product.Id,
             ProductName = product.Name,
             Quantity = quantity,
-            Price = product.Price
+            Price = product.Price,
+            Created = DateTime.UtcNow
         };
     }
 
