@@ -35,9 +35,17 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, Result<
             return Result<int>.Failure("Insufficient stock for the requested quantity.");
         }
 
-        cart.Items.Add(cartItem);
+        var existingItem = cart.Items.FirstOrDefault(x => x.ProductId == request.ProductId);
+        if (existingItem is not null)
+        {
+            cart.Items.FirstOrDefault(x => x.ProductId == request.ProductId).Quantity += request.Quantity;
+        }
+        else
+        {
+            cart.Items.Add(cartItem);
+        }
+        
         cart.LastModified = DateTime.UtcNow;
-
         product.StockQuantity -= cartItem.Quantity;
 
         await UpdateCart(cart, cancellationToken);
