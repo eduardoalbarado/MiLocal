@@ -3,10 +3,11 @@ using Domain.Common;
 namespace Domain.Entities;
 public class CartItem : BaseEntity
 {
+    public int CartId { get; set; }
     public int ProductId { get; set; }
     public string ProductName { get; set; }
     public int Quantity { get; set; }
-    public string AdditionalInfo { get; set; }
+    public string? AdditionalInfo { get; set; }
 
     public decimal Price { get; set; }
     public decimal Discount { get; set; }
@@ -20,5 +21,4 @@ public class CartItem : BaseEntity
     }
     // Navigation property
     public virtual Cart Cart { get; set; }
-    public int CartId { get; set; }
 }

@@ -1,11 +1,9 @@
-using Application.Common.Models.Responses;
 using Application.Features.Carts.Commands.AddToCart;
 using Application.Features.Carts.Commands.RemoveFromCart;
 using Application.Features.Carts.Commands.UpdateCartItemQuantity;
 using Application.Features.Carts.Queries.GetCart;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
 using System.Net.Http;
-using System.Text;
 
 namespace FunctionAppApi.Resources;
 
