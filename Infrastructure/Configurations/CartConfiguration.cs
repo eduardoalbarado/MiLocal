@@ -14,17 +14,24 @@ public class CartConfiguration : IEntityTypeConfiguration<Cart>
         builder.Property(c => c.UserId)
             .IsRequired();
 
-        builder.Property(c => c.TotalPrice)
-            .HasColumnType("decimal(18,2)") // Set the data type and precision for TotalPrice
+        builder.Property(c => c.Created)
+            .IsRequired()
+            .HasColumnType("DATETEXT"); // Assuming Created should not be null
+
+        builder.Property(c => c.LastModified)
+            .HasColumnType("DATETEXT"); // LastModified can be nullable, set its type to TEXT
+
+
+        builder.HasOne(c => c.User)
+            .WithMany(p => p.Carts)
+            .HasForeignKey(pc => pc.UserId)
             .IsRequired();
 
         // Configure the relationship with CartItems
         builder.HasMany(c => c.Items)
-            .WithOne(ci => ci.Cart)
-            .HasForeignKey(ci => ci.CartId)
-            .OnDelete(DeleteBehavior.Cascade); // Set the delete behavior when deleting a cart
+                    .WithOne(ci => ci.Cart)
+                    .HasForeignKey(ci => ci.CartId)
+                    .OnDelete(DeleteBehavior.Cascade); // Set the delete behavior when deleting a cart
 
-        // Additional configurations for the Cart entity can be added here
     }
 }
-

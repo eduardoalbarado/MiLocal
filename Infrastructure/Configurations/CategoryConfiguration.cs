@@ -10,7 +10,7 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.ToTable("Categories");
 
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.Id).HasColumnName("CategoryId").ValueGeneratedOnAdd();
+        builder.Property(x => x.Id).HasColumnName("Id").ValueGeneratedOnAdd();
 
         builder.Property(x => x.Name).IsRequired().HasMaxLength(50);
 
