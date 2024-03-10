@@ -19,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Specifications\" />
     <Folder Include="Contracts\Persistence\" />
     <Folder Include="Interfaces\DataAccess\" />
   </ItemGroup>

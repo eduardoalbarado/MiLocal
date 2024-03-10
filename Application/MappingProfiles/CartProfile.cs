@@ -1,6 +1,8 @@
 ﻿using Application.Features.Carts.Commands.AddToCart;
 using Application.Features.Carts.Commands.UpdateCartItemQuantity;
+using Application.Features.Carts.Queries.GetCart;
 using AutoMapper;
+using Domain.Entities;
 
 namespace Application.MappingProfiles1
 {
@@ -9,7 +11,7 @@ namespace Application.MappingProfiles1
         public CartProfile()
         {
             CreateMap<AddToCartDto, AddToCartCommand>();
-            CreateMap<AddToCartDto, AddToCartCommand>();
+            CreateMap<Cart, CartDto>();
             CreateMap<UpdateCartItemQuantityDto, UpdateCartItemQuantityCommand>();
         }
     }

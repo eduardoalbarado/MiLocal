@@ -40,7 +40,7 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, Result<
 
         product.StockQuantity -= cartItem.Quantity;
 
-        UpdateCart(cart, cancellationToken);
+        await UpdateCart(cart, cancellationToken);
         await _unitOfWork.SaveChangesAsync();
 
         return Result<int>.Success(cartItem.Id);
@@ -62,19 +62,20 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, Result<
     {
         var userId = Guid.Parse(_userContextService.GetUserContext().UserId);
         var cartRepository = _unitOfWork.GetRepository<Cart>();
-        var cartSpec = new CartByUserIdSpecification(userId);
-        var cart = await cartRepository.GetBySpecAsync(cartSpec, cancellationToken);
+        var cartSpecification = new CartByUserIdSpecification(userId);
+        var cart = await cartRepository.FirstOrDefaultAsync(cartSpecification, cancellationToken);
 
         if (cart == null)
         {
             cart = CreateCart(userId);
+
             await cartRepository.AddAsync(cart, cancellationToken);
         }
 
         return cart;
     }
 
-    private async void UpdateCart(Cart cart, CancellationToken cancellationToken)
+    private async Task UpdateCart(Cart cart, CancellationToken cancellationToken)
     {
         var cartRepository = _unitOfWork.GetRepository<Cart>();
         await cartRepository.UpdateAsync(cart, cancellationToken);
