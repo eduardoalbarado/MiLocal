@@ -41,6 +41,7 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, Result<
         product.StockQuantity -= cartItem.Quantity;
 
         await UpdateCart(cart, cancellationToken);
+        await UpdateProduct(product, cancellationToken);
         await _unitOfWork.SaveChangesAsync();
 
         return Result<int>.Success(cartItem.Id);
@@ -79,6 +80,12 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, Result<
     {
         var cartRepository = _unitOfWork.GetRepository<Cart>();
         await cartRepository.UpdateAsync(cart, cancellationToken);
+    }
+
+    private async Task UpdateProduct(Product product, CancellationToken cancellationToken)
+    {
+        var cartRepository = _unitOfWork.GetRepository<Product>();
+        await cartRepository.UpdateAsync(product, cancellationToken);
     }
 
     private static CartItem CreateCartItem(Product product, int quantity)
