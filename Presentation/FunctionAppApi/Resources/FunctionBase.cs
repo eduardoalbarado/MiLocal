@@ -9,8 +9,7 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.OpenApi.Models;
 global using System.Net;
 global using System.Threading.Tasks;
-
-
+using Newtonsoft.Json;
 
 namespace FunctionAppApi.Resources;
 public abstract class FunctionBase
@@ -24,5 +23,12 @@ public abstract class FunctionBase
         _logger = logger;
         _mediator = mediator;
         _mapper = mapper;
+    }
+    protected static async Task<HttpResponseData> CreateJsonResponseAsync(HttpRequestData req,object content, HttpStatusCode? statusCode = null)
+    {
+        var response = req.CreateResponse(statusCode ?? HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(content);
+
+        return response;
     }
 }
