@@ -23,7 +23,7 @@ public abstract class FunctionBase
         _mediator = mediator;
         _mapper = mapper;
     }
-    protected static async Task<HttpResponseData> CreateJsonResponseAsync(HttpRequestData req,object content, HttpStatusCode? statusCode = null)
+    protected static async Task<HttpResponseData> CreateJsonResponseAsync(HttpRequestData req, object content, HttpStatusCode? statusCode = null)
     {
         var response = req.CreateResponse(statusCode ?? HttpStatusCode.OK);
         await response.WriteAsJsonAsync(content);
