@@ -25,7 +25,8 @@ namespace Application.Features.Categories.Queries.GetCategoryById
         public async Task<Result<CategoryDto>> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
         {
             var repository = _unitOfWork.GetRepository<Category>();
-            var category = await repository.GetByIdAsync(request.Id, cancellationToken);
+            var spec = new CategoryByIdSpecification(request.Id);
+            var category = await repository.FirstOrDefaultAsync(spec, cancellationToken);
 
             if (category == null)
             {

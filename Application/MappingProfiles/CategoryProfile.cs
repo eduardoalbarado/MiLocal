@@ -10,14 +10,18 @@ namespace Application.MappingProfiles
     {
         public CategoryProfile()
         {
-            CreateMap<Category, CategoryDto>();
+            CreateMap<Category, CategoryDto>()
+                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.ProductCategories != null ? src.ProductCategories.ToList() : null));
             CreateMap<AddCategoryDto, AddCategoryCommand>();
             CreateMap<AddCategoryCommand, Category>();
             CreateMap<UpdateCategoryDto, UpdateCategoryCommand>();
             CreateMap<UpdateCategoryCommand, Category>();
-            CreateMap<ProductCategory, ProductCategoryGetDto>()
+            CreateMap<ProductCategory, ProductCategoryGetCategoriesDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.CategoryId))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Category.Name));
+            CreateMap<ProductCategory, ProductCategoryGetProductsDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ProductId))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Product.Name));
         }
     }
 }
