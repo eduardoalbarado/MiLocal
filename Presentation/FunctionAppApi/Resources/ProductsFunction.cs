@@ -1,4 +1,5 @@
 using Application.Common.Models.Responses;
+using Application.Features.Products.Commands.AddCategoryToProduct;
 using Application.Features.Products.Commands.AddProduct;
 using Application.Features.Products.Commands.DeleteProduct;
 using Application.Features.Products.Commands.UpdateProduct;
@@ -111,6 +112,26 @@ namespace FunctionAppApi.Resources
                 NewStockQuantity = updateStockDto.NewStockQuantity
             };
 
+            var result = await _mediator.Send(command);
+
+            return new OkObjectResult(result);
+        }
+
+        [Function("AddCategoryToProduct")]
+        [OpenApiOperation(operationId: "AddCategoryToProduct", tags: new[] { "Products" })]
+        [OpenApiParameter(name: "productId", In = ParameterLocation.Path, Required = true, Type = typeof(int), Description = "The ID of the product to add the category to.")]
+        [OpenApiRequestBody("application/json", typeof(CategoryDto), Description = "The category information.")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(Result<ProductDto>), Description = "The OK response with updated product details.")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.BadRequest, contentType: "application/json", bodyType: typeof(ErrorResponse), Description = "Bad request when the category data is invalid.")]
+        public async Task<IActionResult> AddCategoryToProduct(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "products/{productId}/categories")] HttpRequestData req,
+            int productId)
+        {
+            _logger.LogInformation("AddCategoryToProduct function processed a request.");
+
+            var categoryDto = await req.ReadFromJsonAsync<CategoryDto>();
+
+            var command = new AddCategoryToProductCommand { ProductId = productId, Category = categoryDto };
             var result = await _mediator.Send(command);
 
             return new OkObjectResult(result);
