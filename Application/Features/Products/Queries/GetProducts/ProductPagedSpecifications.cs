@@ -1,19 +1,19 @@
 ﻿using Ardalis.Specification;
 using Domain.Entities;
 
-namespace Application.Features.Products.Queries.GetProducts
+namespace Application.Features.Products.Queries.GetProducts;
+
+internal class ProductPagedSpecifications : Specification<Product>
 {
-    internal class ProductPagedSpecifications : Specification<Product>
+    public ProductPagedSpecifications(int pageNumber, int pageSize, bool? enabled)
     {
-        public ProductPagedSpecifications(int pageNumber, int pageSize, bool? enabled)
-        {
-            Query.Skip((pageNumber - 1) * pageSize)
-                 .Take(pageSize);
+        Query.Include(product => product.ProductCategories).ThenInclude(productCategory => productCategory.Category);
+        Query.Skip((pageNumber - 1) * pageSize)
+             .Take(pageSize);
 
-            if (enabled is not null)
-                Query.Where(x => x.Enabled == enabled);
+        if (enabled is not null)
+            Query.Where(x => x.Enabled == enabled);
 
-            Query.OrderBy(x => x.Id);
-        }
+        Query.OrderBy(x => x.Id);
     }
 }

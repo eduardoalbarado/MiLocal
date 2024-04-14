@@ -3,15 +3,15 @@ using Application.Features.Products.Commands.AddProduct;
 using AutoMapper;
 using Domain.Entities;
 
-namespace Application.MappingProfiles
+namespace Application.MappingProfiles;
+
+public class ProductProfile : Profile
 {
-    public class ProductProfile : Profile
+    public ProductProfile()
     {
-        public ProductProfile()
-        {
-            CreateMap<Product, ProductDto>();
-            CreateMap<AddProductCommand, Product>();
-            CreateMap<AddProductDto, AddProductCommand>();
-        }
+        CreateMap<Product, ProductDto>()
+            .ForMember(dest => dest.Categories, opt => opt.MapFrom(src => src.ProductCategories != null ? src.ProductCategories.ToList() : null));
+        CreateMap<AddProductCommand, Product>();
+        CreateMap<AddProductDto, AddProductCommand>();
     }
 }

@@ -1,10 +1,6 @@
-﻿using Application.Interfaces;
-using AutoMapper;
-using Domain.Entities;
-
-namespace Application.Common.Models
+﻿namespace Application.Common.Models
 {
-    public class ProductDto : IMapFrom<Product>
+    public class ProductDto
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -13,9 +9,6 @@ namespace Application.Common.Models
         public decimal Price { get; set; }
         public bool Enabled { get; set; }
         public bool Kit { get; set; }
-        public void Mapping(Profile profile)
-        {
-            profile.CreateMap<Product, ProductDto>();
-        }
+        public List<ProductCategoryGetDto>? Categories { get; set; }
     }
 }

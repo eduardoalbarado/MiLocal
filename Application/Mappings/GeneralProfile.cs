@@ -10,7 +10,6 @@ public class GeneralProfile : Profile
         #region Commands
         #endregion
         #region Queries
-        CreateMap<Product, ProductDto>();
         CreateMap<Order, OrderDto>();
         #endregion
     }
