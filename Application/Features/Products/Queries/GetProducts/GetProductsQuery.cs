@@ -25,7 +25,6 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Paginat
 
     public async Task<PaginatedList<ProductDto>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
-        // Get the repository for MyEntity
         var repository = _unitOfWork.GetRepository<Product>();
 
         ProductPagedSpecifications spec = new(request.PageNumber, request.PageSize, request.Enabled);
