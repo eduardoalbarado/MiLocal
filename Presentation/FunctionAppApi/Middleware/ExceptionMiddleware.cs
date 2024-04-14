@@ -1,4 +1,5 @@
 ﻿using Application.Common.Models.Responses;
+using Application.Exceptions;
 using FluentValidation;
 using FunctionAppApi.Extensions;
 using Microsoft.Azure.Functions.Worker.Middleware;
@@ -36,6 +37,14 @@ public class ExceptionMiddleware : IFunctionsWorkerMiddleware
 
                 await context.CreateJsonResponse(HttpStatusCode.BadRequest, errorResponse);
             }
+            else if (ex.InnerException is BadRequestException badRequestException)
+            {
+                await context.CreateJsonResponse(HttpStatusCode.BadRequest, new ErrorResponse("Bad Request",badRequestException.Message));
+            }
+            else if (ex.InnerException is ConflictException conflictException)
+            {
+                await context.CreateJsonResponse(HttpStatusCode.Conflict, new ErrorResponse("Conflict",conflictException.Message));
+            }
             else
             {
                 // Handle general exception
@@ -44,7 +53,7 @@ public class ExceptionMiddleware : IFunctionsWorkerMiddleware
 #if DEBUG
                 message += $" Debug Message: {ex.Message}";
 #endif
-                var errorResponse = new ErrorResponse(message);
+                var errorResponse = new ErrorResponse("General Exception", message);
 
                 await context.CreateJsonResponse(HttpStatusCode.InternalServerError, errorResponse);
             }

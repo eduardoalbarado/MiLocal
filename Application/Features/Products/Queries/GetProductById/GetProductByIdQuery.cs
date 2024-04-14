@@ -24,18 +24,15 @@ namespace Application.Features.Products.Queries.GetProductById
 
         public async Task<Result<ProductDto>> Handle(GetProductByIdQuery request, CancellationToken cancellationToken)
         {
-            // Get the repository for Product
             var repository = _unitOfWork.GetRepository<Product>();
-
-            // Get the existing product from the repository
-            var product = await repository.GetByIdAsync(request.Id, cancellationToken);
+            var spec = new ProductByIdSpecifications(request.Id);
+            var product = await repository.FirstOrDefaultAsync(spec, cancellationToken);
 
             if (product == null)
             {
                 return Result<ProductDto>.Failure($"Product with Id {request.Id} not found");
             }
 
-            // Map the product to a DTO
             var productDto = _mapper.Map<ProductDto>(product);
 
             return Result<ProductDto>.Success(productDto);

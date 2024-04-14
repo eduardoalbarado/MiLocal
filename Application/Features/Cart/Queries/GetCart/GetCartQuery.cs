@@ -34,7 +34,7 @@ public class GetCartQueryHandler : IRequestHandler<GetCartQuery, Result<CartDto>
 
         var repository = _unitOfWork.GetRepository<Cart>();
         var cartSpec = new CartByUserIdSpecification(userId);
-        var cart = await repository.GetBySpecAsync(cartSpec, cancellationToken);
+        var cart = await repository.FirstOrDefaultAsync(cartSpec, cancellationToken);
 
         if (cart == null)
         {

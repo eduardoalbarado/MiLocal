@@ -9,8 +9,8 @@ namespace FunctionAppApi.Resources;
 
 public class CartFunction : FunctionBase
 {
-    public CartFunction(ILogger<CartFunction> logger, IMediator mediator, IMapper mapper)
-        : base(logger, mediator, mapper)
+    public CartFunction(ILogger<CategoryFunction> logger, IMediator mediator, IMapper mapper)
+            : base(logger, mediator, mapper)
     {
     }
 
@@ -27,16 +27,13 @@ public class CartFunction : FunctionBase
         _logger.LogInformation($"Call to {nameof(GetCartAsync)}");
         var result = await _mediator.Send(new GetCartQuery());
 
-        var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(result);
-
-        return response;
+        return await CreateJsonResponseAsync(req, result);
     }
 
     [Function("AddToCart")]
     [OpenApiOperation(operationId: "addToCart", tags: new[] { "Cart" })]
     [OpenApiRequestBody("application/json", typeof(AddToCartDto))]
-    public async Task<IActionResult> AddToCart(
+    public async Task<HttpResponseData> AddToCart(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "cart/items")] HttpRequestData req)
     {
         _logger.LogInformation("AddToCart function processed a request.");
@@ -45,12 +42,12 @@ public class CartFunction : FunctionBase
         var command = _mapper.Map<AddToCartCommand>(addToCartDto);
         var result = await _mediator.Send(command);
 
-        return new OkObjectResult(result);
+        return await CreateJsonResponseAsync(req, result);
     }
 
     [Function("RemoveFromCart")]
     [OpenApiOperation(operationId: "removeFromCart", tags: new[] { "Cart" })]
-    public async Task<IActionResult> RemoveFromCart(
+    public async Task<HttpResponseData> RemoveFromCart(
         [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "cart/items/{itemId}")] HttpRequestData req, int itemId)
     {
         _logger.LogInformation("RemoveFromCart function processed a request.");
@@ -58,14 +55,14 @@ public class CartFunction : FunctionBase
         var command = new RemoveFromCartCommand { ItemId = itemId };
         var result = await _mediator.Send(command);
 
-        return new OkObjectResult(result);
+        return await CreateJsonResponseAsync(req, result);
     }
 
     [Function("UpdateCartItemQuantity")]
     [OpenApiOperation(operationId: "updateCartItemQuantity", tags: new[] { "Cart" })]
     [OpenApiParameter(name: "itemId", In = ParameterLocation.Path, Required = true, Type = typeof(int))]
     [OpenApiRequestBody("application/json", typeof(UpdateCartItemQuantityDto))]
-    public async Task<IActionResult> UpdateCartItemQuantity(
+    public async Task<HttpResponseData> UpdateCartItemQuantity(
         [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "cart/items/{itemId}")] HttpRequestData req, int itemId)
     {
         _logger.LogInformation("UpdateCartItemQuantity function processed a request.");
@@ -75,6 +72,6 @@ public class CartFunction : FunctionBase
 
         var result = await _mediator.Send(command);
 
-        return new OkObjectResult(result);
+        return await CreateJsonResponseAsync(req, result);
     }
 }

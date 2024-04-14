@@ -9,6 +9,7 @@
         public decimal PriceInDollars { get; set; }
         public decimal Cost { get; set; }
         public decimal CostInDollars { get; set; }
+        public int CategoryId { get; set; }
         public bool Kit { get; set; }
     }
 }

@@ -28,6 +28,10 @@ namespace Application.Features.Products.Commands.AddProduct
 
             RuleFor(p => p.CostInDollars)
                 .GreaterThanOrEqualTo(0).WithMessage("CostInDollars must be greater than or equal to 0.");
+
+            RuleFor(p => p.CategoryId)
+                .NotEmpty().WithMessage("CategoryId is required.")
+                .Must((command, categoryId) => categoryId != null).WithMessage("CategoryId must not be null.");
         }
     }
 }

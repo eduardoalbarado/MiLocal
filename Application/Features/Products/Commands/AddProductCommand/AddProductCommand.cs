@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Domain.Entities;
+using FluentValidation;
+using FluentValidation.Results;
 using MediatR;
 
 namespace Application.Features.Products.Commands.AddProduct
@@ -21,9 +23,31 @@ namespace Application.Features.Products.Commands.AddProduct
 
         public async Task<int> Handle(AddProductCommand request, CancellationToken cancellationToken)
         {
-            var repository = _unitOfWork.GetRepository<Product>();
+            var productRepository = _unitOfWork.GetRepository<Product>();
+            var categoryRepository = _unitOfWork.GetRepository<Category>();
+
+            // Check if the provided CategoryId exists
+            var category = await categoryRepository.GetByIdAsync(request.CategoryId, cancellationToken);
+            if (category == null)
+            {
+                var failure = new ValidationFailure(nameof(request.CategoryId), "Invalid CategoryId provided.");
+                throw new ValidationException("Validation error occurred.", new List<ValidationFailure> { failure });
+            }
+
             var product = _mapper.Map<Product>(request);
-            await repository.AddAsync(product, cancellationToken);
+            await productRepository.AddAsync(product, cancellationToken);
+            await _unitOfWork.SaveChangesAsync();
+
+            // Create a new ProductCategory entity to establish the relationship
+            var productCategory = new ProductCategory
+            {
+                ProductId = product.Id,
+                CategoryId = category.Id
+            };
+
+            // Add the ProductCategory to the database
+            var productCategoryRepository = _unitOfWork.GetRepository<ProductCategory>();
+            await productCategoryRepository.AddAsync(productCategory, cancellationToken);
             await _unitOfWork.SaveChangesAsync();
 
             return product.Id;
