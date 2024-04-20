@@ -17,7 +17,11 @@ public abstract class FunctionBase
     protected readonly IMediator _mediator;
     protected readonly IMapper _mapper;
 
-    protected FunctionBase(ILogger logger, IMediator mediator, IMapper mapper)
+    protected FunctionBase(
+        ILogger logger,
+        IMediator mediator,
+        IMapper mapper
+        )
     {
         _logger = logger;
         _mediator = mediator;
