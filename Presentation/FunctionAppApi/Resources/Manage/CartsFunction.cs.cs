@@ -10,13 +10,13 @@ public class CartsFunction : FunctionBase
     {
     }
     
-    [Function($"{nameof(GetsCart)}")]
-    [OpenApiOperation(operationId: "getCart", tags: new[] { "Manage - Carts" })]
+    [Function($"{nameof(GetsCarts)}")]
+    [OpenApiOperation(operationId: "getCarts", tags: new[] { "Manage - Carts" })]
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(Application.Common.Models.Responses.Result<CartDto>), Description = "The OK response")]
-    public async Task<HttpResponseData> GetsCart(
+    public async Task<HttpResponseData> GetsCarts(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/carts")] HttpRequestData req)
     {
-        _logger.LogInformation($"Call to {nameof(GetsCart)}");
+        _logger.LogInformation($"Call to {nameof(GetsCarts)}");
         var result = await _mediator.Send(new GetCartsQuery());
 
         return await CreateJsonResponseAsync(req, result);
