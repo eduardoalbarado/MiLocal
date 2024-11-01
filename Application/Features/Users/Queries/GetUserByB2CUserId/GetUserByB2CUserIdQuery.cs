@@ -1,8 +1,8 @@
-﻿using Application.Specifications;
+﻿using Application.Common.Specifications;
 using Domain.Entities;
 using MediatR;
 
-namespace Application.Features.Users.Queries;
+namespace Application.Features.Users.Queries.GetUserByB2CUserId;
 
 public class GetUserByB2CUserIdQuery : IRequest<bool>
 {

@@ -1,5 +1,5 @@
 using Application.Common.Models;
-using Application.Features.Users.Queries;
+using Application.Features.Users.Queries.GetUserByB2CUserId;
 using Application.Interfaces;
 using MediatR;
 

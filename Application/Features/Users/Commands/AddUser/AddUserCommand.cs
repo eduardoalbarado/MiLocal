@@ -1,4 +1,4 @@
-﻿using Application.Specifications;
+﻿using Application.Common.Specifications;
 using Domain.Entities;
 using MediatR;
 
