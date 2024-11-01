@@ -57,6 +57,7 @@ public class CategoryFunction : FunctionBase
 
     [Function("DeleteCategory")]
     [OpenApiOperation(operationId: "DeleteCategory", tags: new[] { "Categories" })]
+    [OpenApiParameter(name: "id", In = ParameterLocation.Path, Required = true, Type = typeof(int), Description = "The ID of the category")]
     public async Task<HttpResponseData> DeleteCategory(
         [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "categories/{id}")] HttpRequestData req, int id)
     {
@@ -69,6 +70,7 @@ public class CategoryFunction : FunctionBase
 
     [Function("UpdateCategory")]
     [OpenApiOperation(operationId: "UpdateCategory", tags: new[] { "Categories" })]
+    [OpenApiParameter(name: "id", In = ParameterLocation.Path, Required = true, Type = typeof(int), Description = "The ID of the category")]
     [OpenApiRequestBody("application/json", typeof(UpdateCategoryDto))]
     public async Task<HttpResponseData> UpdateCategory(
         [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "categories/{id}")] HttpRequestData req, int id)
