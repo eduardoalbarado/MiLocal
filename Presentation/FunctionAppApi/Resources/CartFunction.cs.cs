@@ -22,6 +22,7 @@ public class CartFunction : FunctionBase
         Scheme = OpenApiSecuritySchemeType.Bearer,
         BearerFormat = "JWT")]
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(Result<CartDto>), Description = "The OK response")]
+    [OpenApiResponseWithBody(statusCode: HttpStatusCode.Unauthorized, contentType: "application/json", bodyType: typeof(ErrorResponse), Description = "Unauthorized request")]
     public async Task<HttpResponseData> GetCartAsync(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "cart")] HttpRequestData request)
     {

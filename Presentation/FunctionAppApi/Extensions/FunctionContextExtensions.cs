@@ -67,10 +67,8 @@ public static class FunctionContextExtensions
         var request = functionContext.GetHttpRequestData();
         if (request != null)
         {
-            var response = request.CreateResponse(statusCode);
-            response.Headers.Add(HeaderNames.ContentType, MediaTypeNames.Application.Json);
-            await response.WriteAsJsonAsync(data);
-            response.StatusCode = statusCode;
+            var response = request.CreateResponse();
+            await response.WriteAsJsonAsync(data, statusCode);
             functionContext.SendResponseAsync(response);
         }
     }
