@@ -47,9 +47,9 @@ namespace FunctionAppApi.Middleware
             {
                 if (!_isDebug)
                 {
-                    var response = req.CreateResponse(HttpStatusCode.Unauthorized);
+                    var response = req.CreateResponse();
                     response.Headers.Add(HeaderNames.ContentType, MediaTypeNames.Application.Json);
-                    await response.WriteAsJsonAsync(new UnauthorizedResponse { Message = "Invalid token or user context." });
+                    await response.WriteAsJsonAsync(new UnauthorizedResponse { Message = "Invalid token or user context." }, HttpStatusCode.Unauthorized);
                     context.SendResponseAsync(response);
                     return;
                 }
@@ -73,8 +73,8 @@ namespace FunctionAppApi.Middleware
 
             if (userContext == null)
             {
-                var response = req.CreateResponse(HttpStatusCode.Unauthorized);
-                await response.WriteAsJsonAsync(new UnauthorizedResponse { Message = "Invalid token or user context." });
+                var response = req.CreateResponse();
+                await response.WriteAsJsonAsync(new UnauthorizedResponse { Message = "Invalid token or user context." }, HttpStatusCode.Unauthorized);
                 context.SendResponseAsync(response);
                 return;
             }
