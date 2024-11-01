@@ -4,6 +4,7 @@ using Application.Exceptions;
 using AutoMapper;
 using Domain.Entities;
 using MediatR;
+using System.Net;
 
 namespace Application.Features.Categories.Commands.AddCategoryCommand;
 
@@ -31,9 +32,9 @@ public class AddCategoryCommandHandler : IRequestHandler<AddCategoryCommand, int
 
         if (existingCategory != null)
         {
-            throw new ConflictException("Category with the same name already exists.");
+            throw new HttpResponseException(HttpStatusCode.Conflict, "Category with the same name already exists.");
         }
-        
+
         var category = _mapper.Map<Category>(request);
         await repository.AddAsync(category, cancellationToken);
         await _unitOfWork.SaveChangesAsync();

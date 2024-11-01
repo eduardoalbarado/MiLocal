@@ -1,170 +1,156 @@
 using Application.Common.Models.Responses;
+using Application.Features.Users.Commands.AddUser;
 using Application.Interfaces;
 using FunctionAppApi.Extensions;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using System;
-using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Mime;
 using System.Security.Claims;
 using System.Text;
 
-namespace FunctionAppApi.Middleware
-{
-    public class AuthenticationMiddleware : IFunctionsWorkerMiddleware
-    {
-        private ILogger _logger;
-        private readonly IUserContextService _userContextService;
-        private readonly bool _isDebug;
+namespace FunctionAppApi.Middleware;
 
-        public AuthenticationMiddleware(IUserContextService userContextService)
+public class AuthenticationMiddleware : IFunctionsWorkerMiddleware
+{
+    private readonly IUserContextService _userContextService;
+    private readonly IMediator _mediator;
+    private readonly ILogger _logger;
+    private readonly bool _isDebug;
+
+    public AuthenticationMiddleware(IUserContextService userContextService, IMediator mediator, ILogger<AuthenticationMiddleware> logger)
+    {
+        _userContextService = userContextService;
+        _mediator = mediator;
+        _logger = logger;
+        _isDebug = Environment.GetEnvironmentVariable("AzureWebJobsScriptRoot") != null;
+    }
+
+    public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
+    {
+        context.TryExtractHttpRequestData(out var req);
+
+        // Permitir acceso a /swagger sin autenticación
+        if (req != null && req.Url.PathAndQuery.Contains("/swagger"))
         {
-            _userContextService = userContextService;
-            _isDebug = Environment.GetEnvironmentVariable("AzureWebJobsScriptRoot") != null;
+            await next(context);
+            return;
         }
 
-        public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
+        // Verificar la existencia del header Authorization
+        if (!req.Headers.TryGetValues("Authorization", out var authorization) || !authorization.Any())
         {
-            _logger = context.GetLogger<AuthenticationMiddleware>();
-
-
-            context.TryExtractHttpRequestData(out var req);
-
-            if (context.TryExtractHttpRequestData(out var requestSwagger))
+            if (!_isDebug)
             {
-                if (requestSwagger.Url.PathAndQuery.Contains("/swagger"))
-                {
-                    await next(context);
-                    return;
-                }
-            }
-
-            // Check if the request contains the authorization header
-            if (!req.Headers.TryGetValues("Authorization", out var authorization) || !authorization.Any())
-            {
-                if (!_isDebug)
-                {
-                    var response = req.CreateResponse();
-                    response.Headers.Add(HeaderNames.ContentType, MediaTypeNames.Application.Json);
-                    await response.WriteAsJsonAsync(new UnauthorizedResponse { Message = "Invalid token or user context." }, HttpStatusCode.Unauthorized);
-                    context.SendResponseAsync(response);
-                    return;
-                }
-            }
-
-            // Get the token from the authorization header
-            var token = authorization?.First().Replace("Bearer ", "") ?? string.Empty;
-
-            UserContext userContext;
-
-            if (_isDebug)
-            {
-                // In debug mode, directly extract claims from the token
-                userContext = GetUserContextFromDebugToken(token);
-            }
-            else
-            {
-                // In normal mode, validate the token and retrieve the user context
-                userContext = GetUserContextFromToken(token);
-            }
-
-            if (userContext == null)
-            {
-                var response = req.CreateResponse();
-                await response.WriteAsJsonAsync(new UnauthorizedResponse { Message = "Invalid token or user context." }, HttpStatusCode.Unauthorized);
-                context.SendResponseAsync(response);
+                await SendUnauthorizedResponse(context, req, "Invalid token or user context.");
                 return;
             }
-
-            // Store the user context in the request context for later use
-            _userContextService.SetUserContext(userContext);
-
-            await next(context);
         }
 
-        private UserContext GetUserContextFromDebugToken(string token)
+        var token = authorization?.First().Replace("Bearer ", "") ?? string.Empty;
+        var userContext = _isDebug ? GetUserContextFromDebugToken(token) : GetUserContextFromToken(token);
+
+        if (userContext == null)
         {
+            await SendUnauthorizedResponse(context, req, "Invalid token or user context.");
+            return;
+        }
+
+        // Guardar el contexto de usuario
+        _userContextService.SetUserContext(userContext);
+
+        // Verificar si el usuario existe en la base de datos
+        bool userExists = await _userContextService.UserExistsAsync(userContext.UserId);
+        if (!userExists)
+        {
+            var addUserCommand = new AddUserCommand
+            {
+                UserId = userContext.UserId,
+                UserName = userContext.UserName,
+                Email = userContext.Email
+            };
+
             try
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-
-                // Parse the token without validation in debug mode
-                if (tokenHandler.CanReadToken(token))
-                {
-                    var claimsPrincipal = tokenHandler.ReadJwtToken(token);
-
-                    // Extract user information from the claims
-                    string userId = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == "sub")?.Value;
-                    string userName = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name)?.Value;
-                    string userEmail = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value;
-                    string userRole = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role)?.Value;
-
-                    if (string.IsNullOrEmpty(userId))
-                    {
-                        return null;
-                    }
-
-                    // Create and return the user context
-                    return new UserContext(userId, userName, null);
-                }
+                await _mediator.Send(addUserCommand);
             }
             catch (Exception ex)
             {
-                // Handle token parsing exceptions
-                _logger.LogError(ex, "Error parsing debug token.");
+                _logger.LogError(ex, "Failed to add new user.");
+                await SendErrorResponse(context, req, "User creation failed", ex.Message);
+                return;
             }
-
-            return null;
         }
 
-        public static UserContext GetUserContextFromToken(string token)
+        await next(context);
+    }
+
+    private UserContext GetUserContextFromDebugToken(string token)
+    {
+        try
         {
-            if (string.IsNullOrEmpty(token))
+            var tokenHandler = new JwtSecurityTokenHandler();
+            if (tokenHandler.CanReadToken(token))
             {
-                return null;
-            }
-
-            try
-            {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var validationParameters = new TokenValidationParameters
-                {
-                    // Set your validation parameters here (issuer, audience, etc.)
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidIssuer = "tu_issuer",
-                    ValidAudience = "tu_audience",
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("secret_key_mockup")),
-                    ClockSkew = TimeSpan.Zero // Opcionalmente, puedes ajustar el tiempo de tolerancia
-                };
-
-                // Validate and parse the token
-                ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
-
-                // Extract user information from the claims
+                var claimsPrincipal = tokenHandler.ReadJwtToken(token);
                 string userId = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == "sub")?.Value;
-                string userName = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name)?.Value;
-                string userEmail = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value;
-                string userRole = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role)?.Value;
+                string userName = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == "name")?.Value;
+                string email = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == "email")?.Value;
 
-                if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(userName))
-                {
-                    return null;
-                }
-
-                // Create and return the user context
-                return new UserContext(userId, userName, null);
-            }
-            catch (Exception ex)
-            {
-                // Handle token validation exceptions
-                // Log the error if needed
-                return null;
+                return string.IsNullOrEmpty(userId) ? null : new UserContext(userId, userName, email);
             }
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error parsing debug token.");
+        }
+        return null;
+    }
+
+    private UserContext GetUserContextFromToken(string token)
+    {
+        try
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidIssuer = "tu_issuer",
+                ValidAudience = "tu_audience",
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("secret_key_mockup")),
+                ClockSkew = TimeSpan.Zero
+            };
+
+            var claimsPrincipal = tokenHandler.ValidateToken(token, validationParameters, out _);
+            string userId = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == "sub")?.Value;
+            string userName = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name)?.Value;
+            string email = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value;
+
+            return string.IsNullOrEmpty(userId) ? null : new UserContext(userId, userName, email);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error validating token.");
+        }
+        return null;
+    }
+
+    private async Task SendUnauthorizedResponse(FunctionContext context, HttpRequestData req, string message)
+    {
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(new UnauthorizedResponse { Message = message }, HttpStatusCode.Unauthorized);
+        context.SendResponseAsync(response);
+    }
+
+    private async Task SendErrorResponse(FunctionContext context, HttpRequestData req, string title, string detail)
+    {
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(new ErrorResponse(title, detail), HttpStatusCode.InternalServerError);
+        context.SendResponseAsync(response);
     }
 }
