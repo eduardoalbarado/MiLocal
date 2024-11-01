@@ -1,5 +1,6 @@
 using Application.Common.Models;
 using Application.Common.Models.Responses;
+using Application.Exceptions;
 using AutoMapper;
 using Domain.Entities;
 using MediatR;
@@ -30,7 +31,7 @@ namespace Application.Features.Products.Queries.GetProductById
 
             if (product == null)
             {
-                return Result<ProductDto>.Failure($"Product with Id {request.Id} not found");
+                throw new NotFoundException("Product", request.Id);
             }
 
             var productDto = _mapper.Map<ProductDto>(product);

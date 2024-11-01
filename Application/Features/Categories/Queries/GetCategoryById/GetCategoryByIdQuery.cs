@@ -1,5 +1,6 @@
 using Application.Common.Models;
 using Application.Common.Models.Responses;
+using Application.Exceptions;
 using AutoMapper;
 using Domain.Entities;
 using MediatR;
@@ -30,7 +31,7 @@ namespace Application.Features.Categories.Queries.GetCategoryById
 
             if (category == null)
             {
-                return Result<CategoryDto>.Failure($"Category with Id {request.Id} not found");
+                throw new NotFoundException("Category", request.Id);
             }
             var categoryDto = _mapper.Map<CategoryDto>(category);
 

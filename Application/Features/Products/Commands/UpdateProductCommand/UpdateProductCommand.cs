@@ -43,7 +43,7 @@ namespace Application.Features.Products.Commands.UpdateProduct
             product.Kit = request.Kit;
 
             // Update the product in the repository
-            repository.UpdateAsync(product, cancellationToken);
+            await repository.UpdateAsync(product, cancellationToken);
 
             // Save changes to the database
             await _unitOfWork.SaveChangesAsync();
