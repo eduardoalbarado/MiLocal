@@ -19,6 +19,13 @@ public class UnhandledExceptionBehaviour<TRequest, TResponse> : IPipelineBehavio
         {
             return await next();
         }
+        catch (NotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Resource not found in {RequestName}: {Message}",
+                typeof(TRequest).Name, ex.Message);
+
+            throw new HttpResponseException(HttpStatusCode.NotFound, ex.Message);
+        }
         catch (BusinessException ex)
         {
             _logger.LogWarning(ex, "Business exception occurred in {RequestName}: {ErrorCode} - {Message}",

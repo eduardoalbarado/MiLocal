@@ -18,5 +18,16 @@ public class HttpResponseException : Exception
         StatusCode = statusCode;
         ErrorContent = errorContent;
     }
+
+    public HttpResponseException(HttpStatusCode statusCode, string message)
+    : base(message)
+    {
+        StatusCode = statusCode;
+        ErrorContent = new
+        {
+            errorCode = "BUSINESS_ERROR",
+            message
+        };
+    }
 }
 
