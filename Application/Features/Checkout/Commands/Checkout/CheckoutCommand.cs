@@ -47,7 +47,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CheckoutCommand, int>
     private async Task<Cart?> GetCartByUserId(Guid userId, CancellationToken cancellationToken)
     {
         var cartSpec = new CartByUserIdSpecification(userId);
-        var cart = await _unitOfWork.GetRepository<Cart>().GetBySpecAsync(cartSpec, cancellationToken);
+        var cart = await _unitOfWork.GetRepository<Cart>().FirstOrDefaultAsync(cartSpec, cancellationToken);
         return cart;
     }
 

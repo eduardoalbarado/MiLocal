@@ -9,6 +9,6 @@
         public decimal Price { get; set; }
         public bool Enabled { get; set; }
         public bool Kit { get; set; }
-        public List<ProductCategoryGetDto>? Categories { get; set; }
+        public List<ProductCategoryGetCategoriesDto>? Categories { get; set; }
     }
 }

@@ -1,16 +1,14 @@
 ﻿namespace Application.Common.Models.Responses;
 public class ErrorResponse
 {
-    public string Error { get; set; } = "GenericError";
-    public string Message { get; set; } = "An error occurred while processing the request.";
-    public ErrorResponse(string message)
-    {
-        Message = message;
-    }
+    public string Title { get; set; }
+    public string Detail { get; set; }
+    public string ErrorCode { get; set; }
 
-    public ErrorResponse(string error, string message)
+    public ErrorResponse(string title, string detail, string errorCode = null)
     {
-        Error = error;
-        Message = message;
+        Title = title;
+        Detail = detail;
+        ErrorCode = errorCode;
     }
 }

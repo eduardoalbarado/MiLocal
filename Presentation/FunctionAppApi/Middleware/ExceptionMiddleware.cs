@@ -6,58 +6,52 @@ using Microsoft.Azure.Functions.Worker.Middleware;
 using System;
 using System.Collections.Generic;
 
-namespace FunctionAppApi.Middleware;
-
-public class ExceptionMiddleware : IFunctionsWorkerMiddleware
+namespace FunctionAppApi.Middleware
 {
-    public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
+    public class ExceptionMiddleware : IFunctionsWorkerMiddleware
     {
-        try
+        public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
         {
-            await next(context);
-        }
-        catch (Exception ex)
-        {
-            if (ex.InnerException is ValidationException validationException)
+            try
             {
-                var validationErrors = new List<ValidationError>();
-
-                foreach (var error in validationException.Errors)
+                await next(context);
+            }
+            catch (ValidationException ex)
+            {
+                var errors = new Dictionary<string, string[]>();
+                foreach (var failure in ex.Errors)
                 {
-                    var validationError = new ValidationError
+                    if (!errors.ContainsKey(failure.PropertyName))
                     {
-                        PropertyName = error.PropertyName,
-                        ErrorMessage = error.ErrorMessage
-                    };
-
-                    validationErrors.Add(validationError);
+                        errors[failure.PropertyName] = new string[] { failure.ErrorMessage };
+                    }
+                    else
+                    {
+                        var existingErrors = errors[failure.PropertyName];
+                        Array.Resize(ref existingErrors, existingErrors.Length + 1);
+                        existingErrors[^1] = failure.ErrorMessage;
+                        errors[failure.PropertyName] = existingErrors;
+                    }
                 }
 
-                var errorResponse = new ValidationErrorResponse(validationErrors);
-
-                await context.CreateJsonResponse(HttpStatusCode.BadRequest, errorResponse);
+                var response = new ValidationErrorResponse("Validation Error", errors);
+                await context.CreateJsonResponse(HttpStatusCode.BadRequest, response);
             }
-            else if (ex.InnerException is BadRequestException badRequestException)
+            catch (HttpResponseException ex)
             {
-                await context.CreateJsonResponse(HttpStatusCode.BadRequest, new ErrorResponse("Bad Request",badRequestException.Message));
+                var response = new ErrorResponse("Business Error", ex.Message, ex.StatusCode.ToString());
+                await context.CreateJsonResponse(ex.StatusCode, response);
             }
-            else if (ex.InnerException is ConflictException conflictException)
+            catch (NotFoundException ex)
             {
-                await context.CreateJsonResponse(HttpStatusCode.Conflict, new ErrorResponse("Conflict",conflictException.Message));
+                var response = new ErrorResponse("Not Found", ex.Message, "RESOURCE_NOT_FOUND");
+                await context.CreateJsonResponse(HttpStatusCode.NotFound, response);
             }
-            else
+            catch (Exception ex)
             {
-                // Handle general exception
-                string message = $"An error occurred while processing the request.";
-
-#if DEBUG
-                message += $" Debug Message: {ex.Message}";
-#endif
-                var errorResponse = new ErrorResponse("General Exception", message);
-
-                await context.CreateJsonResponse(HttpStatusCode.InternalServerError, errorResponse);
+                var response = new ErrorResponse("Internal Server Error", "An unexpected error occurred.");
+                await context.CreateJsonResponse(HttpStatusCode.InternalServerError, response);
             }
-            return;
         }
     }
 }

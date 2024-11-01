@@ -17,31 +17,31 @@ namespace FunctionAppApi.Resources
         [Function("GetCategories")]
         [OpenApiOperation(operationId: "categories", tags: new[] { "Categories" })]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
-        public async Task<IActionResult> GetCategories(
+        public async Task<HttpResponseData> GetCategories(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "categories")] HttpRequestData req)
         {
             _logger.LogInformation($"Call to {nameof(GetCategories)}");
 
             var result = await _mediator.Send(new GetCategoriesQuery());
-            return new OkObjectResult(result);
+            return await CreateJsonResponseAsync(req, result);
         }
 
         [Function("GetCategoryById")]
         [OpenApiOperation(operationId: "GetCategoryById", tags: new[] { "Categories" })]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
-        public async Task<IActionResult> GetCategoryById(
+        public async Task<HttpResponseData> GetCategoryById(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "categories/{id}")] HttpRequestData req, int id)
         {
             _logger.LogInformation($"Call to {nameof(GetCategoryById)} with Id: {id}");
 
             var result = await _mediator.Send(new GetCategoryByIdQuery { Id = id });
-            return new OkObjectResult(result);
+            return await CreateJsonResponseAsync(req, result);
         }
 
         [Function("AddCategory")]
         [OpenApiOperation(operationId: "AddCategory", tags: new[] { "Categories" })]
         [OpenApiRequestBody("application/json", typeof(AddCategoryDto))]
-        public async Task<IActionResult> AddCategory(
+        public async Task<HttpResponseData> AddCategory(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "categories")] HttpRequestData req)
         {
             _logger.LogInformation("AddCategory function processed a request.");
@@ -49,25 +49,25 @@ namespace FunctionAppApi.Resources
             var addCategoryDto = await req.ReadFromJsonAsync<AddCategoryDto>();
             var command = _mapper.Map<AddCategoryCommand>(addCategoryDto);
             var result = await _mediator.Send(command);
-            return new OkObjectResult(result);
+            return await CreateJsonResponseAsync(req, result);
         }
 
         [Function("DeleteCategory")]
         [OpenApiOperation(operationId: "DeleteCategory", tags: new[] { "Categories" })]
-        public async Task<IActionResult> DeleteCategory(
+        public async Task<HttpResponseData> DeleteCategory(
             [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "categories/{id}")] HttpRequestData req, int id)
         {
             _logger.LogInformation($"DeleteCategory function processed a request for Id: {id}");
 
             var command = new DeleteCategoryCommand { Id = id };
             var result = await _mediator.Send(command);
-            return new OkObjectResult(result);
+            return await CreateJsonResponseAsync(req, result);
         }
 
         [Function("UpdateCategory")]
         [OpenApiOperation(operationId: "UpdateCategory", tags: new[] { "Categories" })]
         [OpenApiRequestBody("application/json", typeof(UpdateCategoryDto))]
-        public async Task<IActionResult> UpdateCategory(
+        public async Task<HttpResponseData> UpdateCategory(
             [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "categories/{id}")] HttpRequestData req, int id)
         {
             _logger.LogInformation($"UpdateCategory function processed a request for Id: {id}");
@@ -77,7 +77,7 @@ namespace FunctionAppApi.Resources
             command.Id = id;
             var result = await _mediator.Send(command);
 
-            return new OkObjectResult(result);
+            return await CreateJsonResponseAsync(req, result);
         }
     }
 }

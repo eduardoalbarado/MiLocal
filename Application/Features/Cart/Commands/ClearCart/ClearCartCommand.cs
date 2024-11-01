@@ -1,4 +1,5 @@
 ﻿using Application.Common.Models.Responses;
+using Application.Exceptions;
 using Application.Features.Carts.Queries.GetCartByUserId;
 using Application.Interfaces;
 using Domain.Entities;
@@ -27,11 +28,11 @@ namespace Application.Features.Carts.Commands.ClearCart
 
             var repository = _unitOfWork.GetRepository<Cart>();
             var cartSpec = new CartByUserIdSpecification(userId);
-            var cart = await repository.GetBySpecAsync(cartSpec, cancellationToken);
+            var cart = await repository.FirstOrDefaultAsync(cartSpec, cancellationToken);
 
             if (cart == null)
             {
-                return Result<Unit>.Failure($"Cart for user with UserId {userId} not found");
+                throw new NotFoundException("Cart", userId);
             }
 
             cart.Items.Clear();

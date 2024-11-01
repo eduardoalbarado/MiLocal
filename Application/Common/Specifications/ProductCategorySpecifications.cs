@@ -3,7 +3,7 @@ using Domain.Entities;
 
 namespace Application.Features.Categories.Queries.GetCategories
 {
-    internal class ProductCategorySpecifications : Specification<ProductCategory>, ISingleResultSpecification
+    internal class ProductCategorySpecifications : Specification<ProductCategory>, ISingleResultSpecification<ProductCategory>
     {
         public ProductCategorySpecifications(int product, int category)
         {

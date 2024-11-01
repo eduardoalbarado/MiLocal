@@ -1,5 +1,6 @@
 using Application.Common.Models;
 using Application.Common.Models.Responses;
+using Application.Exceptions;
 using AutoMapper;
 using Domain.Entities;
 using MediatR;
@@ -25,11 +26,12 @@ namespace Application.Features.Categories.Queries.GetCategoryById
         public async Task<Result<CategoryDto>> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
         {
             var repository = _unitOfWork.GetRepository<Category>();
-            var category = await repository.GetByIdAsync(request.Id, cancellationToken);
+            var spec = new CategoryByIdSpecification(request.Id);
+            var category = await repository.FirstOrDefaultAsync(spec, cancellationToken);
 
             if (category == null)
             {
-                return Result<CategoryDto>.Failure($"Category with Id {request.Id} not found");
+                throw new NotFoundException("Category", request.Id);
             }
             var categoryDto = _mapper.Map<CategoryDto>(category);
 

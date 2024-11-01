@@ -1,12 +1,10 @@
 using Application.Common.Models.Responses;
+using Application.Exceptions;
 using Application.Features.Carts.Queries.GetCartByUserId;
 using Application.Interfaces;
 using Domain.Entities;
 using MediatR;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Net;
 
 namespace Application.Features.Carts.Commands.UpdateCartItemQuantity;
 
@@ -32,18 +30,18 @@ public class UpdateCartItemQuantityCommandHandler : IRequestHandler<UpdateCartIt
 
         var repository = _unitOfWork.GetRepository<Cart>();
         var cartSpec = new CartByUserIdSpecification(userId);
-        var cart = await repository.GetBySpecAsync(cartSpec, cancellationToken);
+        var cart = await repository.FirstOrDefaultAsync(cartSpec, cancellationToken);
 
         if (cart == null)
         {
-            return Result<Unit>.Failure($"Cart for user with UserId {userId} not found");
+            throw new NotFoundException("Cart", userId);
         }
 
         var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == request.CartItemId);
 
         if (cartItem == null)
         {
-            return Result<Unit>.Failure($"CartItem with Id {request.CartItemId} not found in the cart");
+            throw new NotFoundException("Cart Item", request.CartItemId);
         }
 
         // Calculate the quantity change
@@ -54,12 +52,12 @@ public class UpdateCartItemQuantityCommandHandler : IRequestHandler<UpdateCartIt
 
         if (product == null)
         {
-            return Result<Unit>.Failure($"Product with Id {cartItem.ProductId} not found");
+            throw new NotFoundException("Product", cartItem.ProductId);
         }
 
         if (product.StockQuantity < quantityChange)
         {
-            return Result<Unit>.Failure("Insufficient stock for the requested quantity change.");
+            throw new HttpResponseException(HttpStatusCode.Conflict, "Insufficient stock for the requested product.");
         }
 
         // Update the product inventory

@@ -1,11 +1,14 @@
+using Application.Common.Models.Responses;
 using Application.Interfaces;
 using FunctionAppApi.Extensions;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using System;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net.Mime;
 using System.Security.Claims;
 using System.Text;
 
@@ -44,9 +47,9 @@ namespace FunctionAppApi.Middleware
             {
                 if (!_isDebug)
                 {
-                    var response = req.CreateResponse(HttpStatusCode.Unauthorized);
-                    response.Headers.Add("Content-Type", "text/plain");
-                    await response.WriteStringAsync("You must provide valid credentials to access this resource.");
+                    var response = req.CreateResponse();
+                    response.Headers.Add(HeaderNames.ContentType, MediaTypeNames.Application.Json);
+                    await response.WriteAsJsonAsync(new UnauthorizedResponse { Message = "Invalid token or user context." }, HttpStatusCode.Unauthorized);
                     context.SendResponseAsync(response);
                     return;
                 }
@@ -70,9 +73,8 @@ namespace FunctionAppApi.Middleware
 
             if (userContext == null)
             {
-                var response = req.CreateResponse(HttpStatusCode.Unauthorized);
-                response.Headers.Add("Content-Type", "text/plain");
-                await response.WriteStringAsync("Invalid token or user context.");
+                var response = req.CreateResponse();
+                await response.WriteAsJsonAsync(new UnauthorizedResponse { Message = "Invalid token or user context." }, HttpStatusCode.Unauthorized);
                 context.SendResponseAsync(response);
                 return;
             }

@@ -5,6 +5,7 @@ using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
 using MediatR;
+using System.Net;
 
 namespace Application.Features.Carts.Commands.AddToCart;
 public class AddToCartCommand : AddToCartDto, IRequest<Result<int>>
@@ -32,7 +33,7 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, Result<
 
         if (product.StockQuantity < cartItem.Quantity)
         {
-            return Result<int>.Failure("Insufficient stock for the requested quantity.");
+            throw new HttpResponseException(HttpStatusCode.Conflict, "Insufficient stock for the requested product.");
         }
 
         var existingItem = cart.Items.FirstOrDefault(x => x.ProductId == request.ProductId);
@@ -44,7 +45,7 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, Result<
         {
             cart.Items.Add(cartItem);
         }
-        
+
         cart.LastModified = DateTime.UtcNow;
         product.StockQuantity -= cartItem.Quantity;
 

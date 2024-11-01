@@ -1,7 +1,9 @@
 ﻿
+using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mime;
 
 namespace FunctionAppApi.Extensions;
 public static class FunctionContextExtensions
@@ -65,9 +67,8 @@ public static class FunctionContextExtensions
         var request = functionContext.GetHttpRequestData();
         if (request != null)
         {
-            var response = request.CreateResponse(statusCode);
-            await response.WriteAsJsonAsync(data);
-            response.StatusCode = statusCode;
+            var response = request.CreateResponse();
+            await response.WriteAsJsonAsync(data, statusCode);
             functionContext.SendResponseAsync(response);
         }
     }
