@@ -1,7 +1,9 @@
 using Application.Common.Models.Responses;
+using Application.Exceptions;
 using AutoMapper;
 using Domain.Entities;
 using MediatR;
+using System.Net;
 
 namespace Application.Features.Carts.Queries.GetCartByUserId
 {
@@ -25,11 +27,11 @@ namespace Application.Features.Carts.Queries.GetCartByUserId
         {
             var repository = _unitOfWork.GetRepository<Cart>();
             var cartSpec = new CartByUserIdSpecification(request.UserId);
-            var cart = await repository.GetBySpecAsync(cartSpec, cancellationToken);
+            var cart = await repository.FirstOrDefaultAsync(cartSpec, cancellationToken);
 
             if (cart == null)
             {
-                return Result<CartDto>.Failure($"Cart for user with UserId {request.UserId} not found");
+                throw new NotFoundException("Cart", request.UserId);
             }
 
             var cartDto = _mapper.Map<CartDto>(cart);

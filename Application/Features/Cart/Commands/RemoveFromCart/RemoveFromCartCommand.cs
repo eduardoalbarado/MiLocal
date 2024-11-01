@@ -4,6 +4,7 @@ using Application.Features.Carts.Queries.GetCartByUserId;
 using Application.Interfaces;
 using Domain.Entities;
 using MediatR;
+using System.Net;
 
 namespace Application.Features.Carts.Commands.RemoveFromCart;
 
@@ -42,8 +43,7 @@ public class RemoveFromCartCommandHandler : IRequestHandler<RemoveFromCartComman
         }
         catch (Exception ex)
         {
-            // TODO Log a failure.
-            return Result<Unit>.Failure($"An error occurred: {ex.Message}");
+            throw;
         }
     }
 
@@ -51,7 +51,7 @@ public class RemoveFromCartCommandHandler : IRequestHandler<RemoveFromCartComman
     {
         var cartRepository = _unitOfWork.GetRepository<Cart>();
         var cartSpec = new CartByUserIdSpecification(userId);
-        return await cartRepository.GetBySpecAsync(cartSpec, cancellationToken);
+        return await cartRepository.FirstOrDefaultAsync(cartSpec, cancellationToken);
     }
 
     private CartItem GetCartItemById(Cart cart, int itemId)
@@ -60,7 +60,7 @@ public class RemoveFromCartCommandHandler : IRequestHandler<RemoveFromCartComman
 
         if (cartItem == null)
         {
-            throw new NotFoundException($"CartItem with Id {itemId} not found in the cart");
+            throw new NotFoundException("Cart Item", itemId);
         }
 
         return cartItem;
@@ -73,7 +73,7 @@ public class RemoveFromCartCommandHandler : IRequestHandler<RemoveFromCartComman
 
         if (product == null)
         {
-            throw new NotFoundException($"Product with Id {cartItem.ProductId} not found");
+            throw new NotFoundException(nameof(Product), cartItem.ProductId);
         }
 
         return product;

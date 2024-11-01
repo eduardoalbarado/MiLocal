@@ -1,5 +1,6 @@
 using Application.Common.Models;
 using Application.Common.Models.Responses;
+using Application.Exceptions;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
@@ -31,11 +32,11 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Resul
 
         var repository = _unitOfWork.GetRepository<Order>();
         var orderSpec = new OrderByIdSpecification(userId, request.OrderId);
-        var order = await repository.GetBySpecAsync(orderSpec, cancellationToken);
+        var order = await repository.FirstOrDefaultAsync(orderSpec, cancellationToken);
 
         if (order == null)
         {
-            return Result<OrderDto>.Failure($"Order with ID {request.OrderId} not found.");
+            throw new NotFoundException("Order", request.OrderId);
         }
 
         var orderDto = _mapper.Map<OrderDto>(order);
