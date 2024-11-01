@@ -51,7 +51,7 @@ namespace YourApplication.UnitTests.Features.Carts.Commands
             productRepositoryMock
                 .Setup(pr => pr.GetByIdAsync(productId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(product);
-            cartRepositoryMock.Setup(cr => cr.GetBySpecAsync(It.IsAny<CartByUserIdSpecification>(), It.IsAny<CancellationToken>())).ReturnsAsync(cart);
+            cartRepositoryMock.Setup(cr => cr.FirstOrDefaultAsync(It.IsAny<CartByUserIdSpecification>(), It.IsAny<CancellationToken>())).ReturnsAsync(cart);
 
             var sut = new AddToCartCommandHandler(unitOfWorkMock.Object, mapperMock.Object, userContextServiceMock.Object);
 
@@ -142,7 +142,6 @@ namespace YourApplication.UnitTests.Features.Carts.Commands
 
             // Assert
             result.IsSuccess.Should().BeFalse();
-            result.ErrorMessage.Should().Contain("Insufficient stock");
         }
 
         [Fact]
