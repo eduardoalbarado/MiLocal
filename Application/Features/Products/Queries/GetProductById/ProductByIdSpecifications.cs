@@ -2,7 +2,7 @@
 using Domain.Entities;
 
 namespace Application.Features.Products.Queries.GetProductById;
-internal class ProductByIdSpecifications : Specification<Product>, ISingleResultSpecification
+internal class ProductByIdSpecifications : Specification<Product>, ISingleResultSpecification<Product>
 {
     public ProductByIdSpecifications(int id)
     {
