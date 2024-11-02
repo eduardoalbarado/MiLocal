@@ -27,7 +27,7 @@ public class UserContextService : IUserContextService
 
     public async Task<bool> UserExistsAsync(string userId)
     {
-        var query = new GetUserByB2CUserIdQuery(userId);
+        var query = new GetUserByIdQuery(userId);
         return await _mediator.Send(query);
     }
 }

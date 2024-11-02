@@ -24,7 +24,7 @@ namespace Application.Features.Users.Commands.AddUser
         {
             var userRepository = _unitOfWork.GetRepository<User>();
 
-            var userSpec = new UserByB2CUserIdSpec(request.UserId);
+            var userSpec = new UserByIdSpec(request.UserId);
             var existingUser = await userRepository.FirstOrDefaultAsync(userSpec, cancellationToken);
 
             if (existingUser != null)
@@ -34,6 +34,7 @@ namespace Application.Features.Users.Commands.AddUser
 
             var user = new User
             {
+                Id = Guid.Parse(request.UserId),
                 B2CUserId = request.UserId,
                 Email = request.Email,
                 FirstName = request.UserName,
