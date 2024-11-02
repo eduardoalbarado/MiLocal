@@ -29,9 +29,9 @@ public class CartConfiguration : IEntityTypeConfiguration<Cart>
 
         // Configure the relationship with CartItems
         builder.HasMany(c => c.Items)
-                    .WithOne(ci => ci.Cart)
-                    .HasForeignKey(ci => ci.CartId)
-                    .OnDelete(DeleteBehavior.Cascade); // Set the delete behavior when deleting a cart
+            .WithOne(ci => ci.Cart)
+            .HasForeignKey(ci => ci.CartId)
+            .OnDelete(DeleteBehavior.Cascade); // Set the delete behavior when deleting a cart
 
     }
 }
