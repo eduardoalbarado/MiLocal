@@ -28,7 +28,7 @@ public class AddCategoryCommandHandler : IRequestHandler<AddCategoryCommand, int
         var repository = _unitOfWork.GetRepository<Category>();
 
         var categoryExistsSpec = new GetCategoryByNameSpecification(request.Name);
-        var existingCategory = await repository.FirstOrDefaultAsync(categoryExistsSpec);
+        var existingCategory = await repository.FirstOrDefaultAsync(categoryExistsSpec, cancellationToken);
 
         if (existingCategory != null)
         {

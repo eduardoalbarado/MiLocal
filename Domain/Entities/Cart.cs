@@ -3,7 +3,6 @@ using Domain.Common;
 namespace Domain.Entities;
 public class Cart : BaseEntity
 {
-    public int Id { get; set; }
     public Guid UserId { get; set; }
     public virtual ICollection<CartItem> Items { get; set; } = new List<CartItem>();
     public virtual decimal Total
