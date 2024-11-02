@@ -33,7 +33,7 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, Result<
 
         if (product.StockQuantity < cartItem.Quantity)
         {
-            throw new HttpResponseException(HttpStatusCode.Conflict, "Insufficient stock for the requested product.");
+            throw new BusinessException("Insufficient stock for the requested product.", HttpStatusCode.Conflict);
         }
 
         var existingItem = cart.Items.FirstOrDefault(x => x.ProductId == request.ProductId);
@@ -62,7 +62,7 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, Result<
 
         if (product == null)
         {
-            throw new NotFoundException("Product not found.", productId);
+            throw new NotFoundException(nameof(Product), productId);
         }
 
         return product;
@@ -93,8 +93,8 @@ public class AddToCartCommandHandler : IRequestHandler<AddToCartCommand, Result<
 
     private async Task UpdateProduct(Product product, CancellationToken cancellationToken)
     {
-        var cartRepository = _unitOfWork.GetRepository<Product>();
-        await cartRepository.UpdateAsync(product, cancellationToken);
+        var cartProduct = _unitOfWork.GetRepository<Product>();
+        await cartProduct.UpdateAsync(product, cancellationToken);
     }
 
     private static CartItem CreateCartItem(Product product, int quantity)
