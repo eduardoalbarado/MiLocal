@@ -28,45 +28,49 @@ public class UpdateCartItemQuantityCommandHandler : IRequestHandler<UpdateCartIt
     {
         var userId = Guid.Parse(_userContextService.GetUserContext().UserId);
 
-        var repository = _unitOfWork.GetRepository<Cart>();
+        // Obtener el carrito del usuario
+        var cartRepository = _unitOfWork.GetRepository<Cart>();
         var cartSpec = new CartByUserIdSpecification(userId);
-        var cart = await repository.FirstOrDefaultAsync(cartSpec, cancellationToken);
+        var cart = await cartRepository.FirstOrDefaultAsync(cartSpec, cancellationToken);
 
         if (cart == null)
         {
-            throw new NotFoundException("Cart", userId);
+            throw new NotFoundException(nameof(Cart), userId);
         }
 
+        // Obtener el item del carrito
         var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == request.CartItemId);
-
         if (cartItem == null)
         {
-            throw new NotFoundException("Cart Item", request.CartItemId);
+            throw new NotFoundException(nameof(CartItem), request.CartItemId);
         }
 
-        // Calculate the quantity change
-        var quantityChange = request.Quantity - cartItem.Quantity;
-
-        // Check if there's enough inventory
-        var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(cartItem.ProductId, cancellationToken);
-
+        // Obtener el producto relacionado
+        var productRepository = _unitOfWork.GetRepository<Product>();
+        var product = await productRepository.GetByIdAsync(cartItem.ProductId, cancellationToken);
         if (product == null)
         {
-            throw new NotFoundException("Product", cartItem.ProductId);
+            throw new NotFoundException(nameof(Product), cartItem.ProductId);
         }
 
-        if (product.StockQuantity < quantityChange)
+        int quantityDifference = request.Quantity - cartItem.Quantity;
+
+        // Verificar si hay stock suficiente si la cantidad aumenta
+        if (quantityDifference > 0 && product.StockQuantity < quantityDifference)
         {
-            throw new HttpResponseException(HttpStatusCode.Conflict, "Insufficient stock for the requested product.");
+            throw new BusinessException("Insufficient stock for the requested quantity.", HttpStatusCode.Conflict);
         }
 
-        // Update the product inventory
-        product.StockQuantity -= quantityChange;
+        // Actualizar el stock del producto según la diferencia en cantidad
+        product.StockQuantity -= quantityDifference;
+        await productRepository.UpdateAsync(product, cancellationToken);
 
-        // Update the cart item quantity
+        // Actualizar la cantidad en el item del carrito
         cartItem.Quantity = request.Quantity;
         cart.LastModified = DateTime.UtcNow;
+        await cartRepository.UpdateAsync(cart, cancellationToken);
 
+        // Guardar cambios
         await _unitOfWork.SaveChangesAsync();
 
         return Result<Unit>.Success(Unit.Value);
