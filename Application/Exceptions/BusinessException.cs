@@ -9,13 +9,13 @@ namespace Application.Exceptions;
 
 public class BusinessException : Exception
 {
-    public string ErrorCode { get; }
+    public string Message { get; }
     public HttpStatusCode StatusCode { get; }
 
-    public BusinessException(string errorCode, string message, HttpStatusCode statusCode = HttpStatusCode.BadRequest)
+    public BusinessException(string message, HttpStatusCode statusCode = HttpStatusCode.BadRequest)
         : base(message)
     {
-        ErrorCode = errorCode;
+        Message = message;
         StatusCode = statusCode;
     }
 }
