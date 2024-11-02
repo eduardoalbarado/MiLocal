@@ -1,6 +1,6 @@
 using Application.Common.Models.Responses;
 using Application.Exceptions;
-using Application.Features.Carts.Queries.GetCartByUserId;
+using Application.Features.Carts.Queries.GetCart;
 using Application.Interfaces;
 using Domain.Entities;
 using MediatR;
@@ -29,64 +29,56 @@ public class RemoveFromCartCommandHandler : IRequestHandler<RemoveFromCartComman
         try
         {
             var userId = Guid.Parse(_userContextService.GetUserContext().UserId);
-            var cart = await GetCartForUser(userId, cancellationToken);
-            var cartItem = GetCartItemById(cart, request.ItemId);
 
-            var product = await GetProductForCartItem(cartItem, cancellationToken);
+            // Obtener el carrito del usuario
+            var cartRepository = _unitOfWork.GetRepository<Cart>();
+            var cartSpec = new CartByUserIdSpecification(userId);
+            var cart = await cartRepository.FirstOrDefaultAsync(cartSpec, cancellationToken);
 
-            UpdateProductStock(product, cartItem.Quantity);
-            RemoveCartItemFromCart(cart, cartItem);
+            if (cart == null)
+            {
+                throw new NotFoundException(nameof(Cart), userId);
+            }
 
+            // Obtener el item del carrito a eliminar
+            var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == request.ItemId);
+            if (cartItem == null)
+            {
+                throw new NotFoundException(nameof(cartItem), request.ItemId);
+            }
+
+            // Obtener el producto relacionado con el item del carrito
+            var productRepository = _unitOfWork.GetRepository<Product>();
+            var product = await productRepository.GetByIdAsync(cartItem.ProductId, cancellationToken);
+            if (product == null)
+            {
+                throw new NotFoundException(nameof(Product), cartItem.ProductId);
+            }
+
+            await _unitOfWork.BeginTransactionAsync();
+
+            // Actualizar el stock del producto
+            product.StockQuantity += cartItem.Quantity;
+            await productRepository.UpdateAsync(product, cancellationToken);
+
+            // Remover el item del carrito desde el repositorio de CartItem
+            var cartItemRepository = _unitOfWork.GetRepository<CartItem>();
+            await cartItemRepository.DeleteAsync(cartItem, cancellationToken);
+
+            // Remover el item del carrito
+            cart.LastModified = DateTime.UtcNow;
+            await cartRepository.UpdateAsync(cart, cancellationToken);
+
+            // Guardar cambios y confirmar transacción
             await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.CommitTransactionAsync();
 
             return Result<Unit>.Success(Unit.Value);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
+            _unitOfWork.RollbackTransaction();
             throw;
         }
-    }
-
-    private async Task<Cart> GetCartForUser(Guid userId, CancellationToken cancellationToken)
-    {
-        var cartRepository = _unitOfWork.GetRepository<Cart>();
-        var cartSpec = new CartByUserIdSpecification(userId);
-        return await cartRepository.FirstOrDefaultAsync(cartSpec, cancellationToken);
-    }
-
-    private CartItem GetCartItemById(Cart cart, int itemId)
-    {
-        var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == itemId);
-
-        if (cartItem == null)
-        {
-            throw new NotFoundException("Cart Item", itemId);
-        }
-
-        return cartItem;
-    }
-
-    private async Task<Product> GetProductForCartItem(CartItem cartItem, CancellationToken cancellationToken)
-    {
-        var productRepository = _unitOfWork.GetRepository<Product>();
-        var product = await productRepository.GetByIdAsync(cartItem.ProductId, cancellationToken);
-
-        if (product == null)
-        {
-            throw new NotFoundException(nameof(Product), cartItem.ProductId);
-        }
-
-        return product;
-    }
-
-    private void UpdateProductStock(Product product, int quantity)
-    {
-        product.StockQuantity += quantity;
-    }
-
-    private void RemoveCartItemFromCart(Cart cart, CartItem cartItem)
-    {
-        cart.Items.Remove(cartItem);
-        cart.LastModified = DateTime.UtcNow;
     }
 }
