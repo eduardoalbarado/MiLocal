@@ -4,11 +4,9 @@ using Application.Interfaces;
 using FunctionAppApi.Extensions;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Net.Http.Headers;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Net.Mime;
 using System.Security.Claims;
 using System.Text;
 
@@ -63,7 +61,18 @@ public class AuthenticationMiddleware : IFunctionsWorkerMiddleware
         _userContextService.SetUserContext(userContext);
 
         // Verificar si el usuario existe en la base de datos
-        bool userExists = await _userContextService.UserExistsAsync(userContext.UserId);
+        bool userExists;
+        try
+        {
+            userExists = await _userContextService.UserExistsAsync(userContext.UserId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Database connection failed while checking if user exists.");
+            await SendErrorResponse(context, req, "Database Error", "Unable to connect to the database. Please try again later.");
+            return;
+        }
+
         if (!userExists)
         {
             var addUserCommand = new AddUserCommand
