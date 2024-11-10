@@ -29,7 +29,8 @@ public class OpenApiConfigurationOptions : IOpenApiConfigurationOptions
     public bool ForceHttps { get; set; } = false;
     public List<IDocumentFilter> DocumentFilters { get; set; } = new List<IDocumentFilter>
         {
-            new SecurityRequirementsDocumentFilter()
+            new SecurityRequirementsDocumentFilter(),
+            new InternalErrorResponseDocumentFilter()
         };
 }
 
