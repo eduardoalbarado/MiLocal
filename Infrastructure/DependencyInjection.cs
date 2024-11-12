@@ -15,6 +15,7 @@ public static class DependencyInjection
     {
         string environment = configuration.GetValue<string>("AZURE_FUNCTIONS_ENVIRONMENT") ?? "Development";
         bool isDevEnvironment = environment.Equals("Development", StringComparison.OrdinalIgnoreCase);
+        string databaseProvider = configuration.GetValue<string>("DatabaseProvider") ?? "Sqlite";
 
         services.AddTransient<IDateTime, DateTimeService>();
 
@@ -23,16 +24,38 @@ public static class DependencyInjection
             services.AddDbContext<MiLocalDbContext>(options =>
                 options.UseInMemoryDatabase("AdminDb"));
         }
+        else if (databaseProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+        {
+            // Use SQL Server with connection string from configuration
+            string sqlServerConnectionString = configuration.GetConnectionString("SqlServerConnection") ?? throw new InvalidOperationException("Connection string 'SqlServerConnection' is not defined in the configuration.");
+            services.AddDbContext<MiLocalDbContext>(options =>
+                options.UseSqlServer(sqlServerConnectionString, sqlOptions =>
+                {
+                    sqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "dbo");  // Optional: set migrations schema
+                })
+                .EnableSensitiveDataLogging(isDevEnvironment));
+        }
         else
         {
+            // Default to SQLite with file path based on environment
+            string sqliteConnectionString = isDevEnvironment
+                ? "Data Source=Data\\MiLocalDb.db"
+                : "Data Source=C:/home/MiLocalDb.db";
+
             services.AddDbContext<MiLocalDbContext>(options =>
-                options.UseSqlite($"Data Source={(isDevEnvironment ? "Data\\MiLocalDb.db" : "C:/home/MiLocalDb.db")}"));
+                options.UseSqlite(sqliteConnectionString)
+                .EnableSensitiveDataLogging(isDevEnvironment)
+                .UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll));
         }
-        services.AddScoped<IDbContext>(provider => provider.GetRequiredService<IDbContext>());
+        // Registering IDbContext as MiLocalDbContext
+        services.AddScoped<IDbContext, MiLocalDbContext>();
+
         // Registering the repositories
         services.AddTransient(typeof(IRepositoryAsync<>), typeof(RepositoryAsync<>));
+
         // Registering the UnitOfWork
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
         services.AddTransient<IEmailService, EmailService>();
         services.AddTransient<IDateTime, DateTimeService>();
         services.AddTransient<IPaymentGatewayClient, MercadoPagoPaymentGatewayClient>();
