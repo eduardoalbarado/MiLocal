@@ -17,36 +17,10 @@ public static class DependencyInjection
         bool isDevEnvironment = environment.Equals("Development", StringComparison.OrdinalIgnoreCase);
         string databaseProvider = configuration.GetValue<string>("DatabaseProvider") ?? "Sqlite";
 
-        services.AddTransient<IDateTime, DateTimeService>();
+        ConfigureDatabase(services, configuration, isDevEnvironment, databaseProvider);
 
-        if (configuration.GetValue<bool>("UseInMemoryDatabase"))
-        {
-            services.AddDbContext<MiLocalDbContext>(options =>
-                options.UseInMemoryDatabase("AdminDb"));
-        }
-        else if (databaseProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
-        {
-            // Use SQL Server with connection string from configuration
-            string sqlServerConnectionString = configuration.GetConnectionString("SqlServerConnection") ?? throw new InvalidOperationException("Connection string 'SqlServerConnection' is not defined in the configuration.");
-            services.AddDbContext<MiLocalDbContext>(options =>
-                options.UseSqlServer(sqlServerConnectionString, sqlOptions =>
-                {
-                    sqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "dbo");  // Optional: set migrations schema
-                })
-                .EnableSensitiveDataLogging(isDevEnvironment));
-        }
-        else
-        {
-            // Default to SQLite with file path based on environment
-            string sqliteConnectionString = isDevEnvironment
-                ? "Data Source=Data\\MiLocalDb.db"
-                : "Data Source=C:/home/MiLocalDb.db";
 
-            services.AddDbContext<MiLocalDbContext>(options =>
-                options.UseSqlite(sqliteConnectionString)
-                .EnableSensitiveDataLogging(isDevEnvironment)
-                .UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll));
-        }
+
         // Registering IDbContext as MiLocalDbContext
         services.AddScoped<IDbContext, MiLocalDbContext>();
 
@@ -61,5 +35,34 @@ public static class DependencyInjection
         services.AddTransient<IPaymentGatewayClient, MercadoPagoPaymentGatewayClient>();
 
         return services;
+    }
+
+    private static void ConfigureDatabase(IServiceCollection services, IConfiguration configuration, bool isDevEnvironment, string databaseProvider)
+    {
+        if (configuration.GetValue<bool>("UseInMemoryDatabase"))
+        {
+            services.AddDbContext<MiLocalDbContext>(options =>
+                options.UseInMemoryDatabase("AdminDb"));
+        }
+        else if (databaseProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+        {
+            string sqlServerConnectionString = configuration.GetConnectionString("SqlServer") ?? throw new InvalidOperationException("Connection string 'SqlServer' is not defined in the configuration.");
+            services.AddDbContext<MiLocalDbContext>(options =>
+                options.UseSqlServer(sqlServerConnectionString, sqlOptions =>
+                {
+                    sqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "dbo");  // Optional: set migrations schema
+                })
+                .EnableSensitiveDataLogging(isDevEnvironment));
+        }
+        else if (databaseProvider.Equals("SQLite", StringComparison.OrdinalIgnoreCase))
+        {
+            string sqliteConnectionString = configuration.GetConnectionString("SQLite") ?? throw new InvalidOperationException("Connection string 'SQLite' is not defined in the configuration.");
+            services.AddDbContext<MiLocalDbContext>(options =>
+                options.UseSqlite(sqliteConnectionString)
+                .EnableSensitiveDataLogging(isDevEnvironment)
+                .UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll));
+        }
+        else
+        { throw new ArgumentException("Not a valid database type"); }
     }
 }
