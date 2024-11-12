@@ -27,7 +27,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, bool>
     {
         var userRepository = _unitOfWork.GetRepository<User>();
         var userSpec = new UserByIdSpec(request.B2CUserId);
-        var existingUser = await userRepository.FirstOrDefaultAsync(userSpec, cancellationToken);
+        var existingUser = await userRepository.FirstOrDefaultAsync(userSpec, cancellationToken);//line 20
 
         return existingUser != null;
     }
