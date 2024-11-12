@@ -1,8 +1,9 @@
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Infrastructure.Configurations;
+namespace Infrastructure.Persistence.Configurations.SqlServer;
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
@@ -12,11 +13,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(u => u.Id);
 
         builder.Property(u => u.Id)
-            .HasColumnType("TEXT")
-            .HasConversion(
-                id => id.ToString(),
-                id => Guid.Parse(id)
-            );
+            .HasColumnType("uniqueidentifier")
+            .IsRequired();
 
         builder.Property(u => u.FirstName)
             .IsRequired()
