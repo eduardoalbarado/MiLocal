@@ -4,6 +4,8 @@ using Application.Features.Categories.Commands.DeleteCategoryCommand;
 using Application.Features.Categories.Commands.UpdateCategoryCommand;
 using Application.Features.Categories.Queries.GetCategories;
 using Application.Features.Categories.Queries.GetCategoryById;
+using Azure.Core;
+using FunctionAppApi.Extensions;
 
 namespace FunctionAppApi.Resources;
 
@@ -43,16 +45,18 @@ public class CategoryFunction : FunctionBase
 
     [Function("AddCategory")]
     [OpenApiOperation(operationId: "AddCategory", tags: new[] { "Categories" })]
+    [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(Result<int>), Description = "The OK response")]
     [OpenApiRequestBody("application/json", typeof(AddCategoryDto))]
     public async Task<HttpResponseData> AddCategory(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "categories")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "categories")] HttpRequestData request)
     {
         _logger.LogInformation("AddCategory function processed a request.");
 
-        var addCategoryDto = await req.ReadFromJsonAsync<AddCategoryDto>();
+        var addCategoryDto = await request.ReadFromJsonAsync<AddCategoryDto>();
         var command = _mapper.Map<AddCategoryCommand>(addCategoryDto);
         var result = await _mediator.Send(command);
-        return await CreateJsonResponseAsync(req, result);
+
+        return await request.CreateHttpResponseAsync(result);
     }
 
     [Function("DeleteCategory")]
