@@ -5,4 +5,5 @@ public interface IUserContextService
 {
     UserContext GetUserContext();
     void SetUserContext(UserContext userContext);
+    Task<bool> UserExistsAsync(string userId);
 }

@@ -9,7 +9,6 @@ public static class HttpRequestDataExtensions
         this HttpRequestData request, object data, HttpStatusCode statusCode = HttpStatusCode.OK)
     {
         var response = request.CreateResponse(statusCode);
-        response.Headers.Add(HeaderNames.ContentType, MediaTypeNames.Application.Json);
         await response.WriteAsJsonAsync(data);
 
         return response;

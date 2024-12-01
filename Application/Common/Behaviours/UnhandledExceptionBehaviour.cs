@@ -29,9 +29,9 @@ public class UnhandledExceptionBehaviour<TRequest, TResponse> : IPipelineBehavio
         catch (BusinessException ex)
         {
             _logger.LogWarning(ex, "Business exception occurred in {RequestName}: {ErrorCode} - {Message}",
-                typeof(TRequest).Name, ex.ErrorCode, ex.Message);
+                typeof(TRequest).Name, ex.StatusCode, ex.Message);
 
-            throw new HttpResponseException(ex.StatusCode, new { errorCode = ex.ErrorCode, message = ex.Message });
+            throw new HttpResponseException(ex.StatusCode, ex.Message);
         }
         catch (Exception ex)
         {

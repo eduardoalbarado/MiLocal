@@ -1,6 +1,8 @@
 ﻿using Application;
 using Application.Interfaces;
+using Application.Interfaces.PaymentService;
 using Application.Services;
+using Application.Services.PaymentService;
 using Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,5 +22,6 @@ public class Startup
         services.AddApplication();
         services.AddInfrastructure(configuration);
         services.AddSingleton<IUserContextService, UserContextService>();
+        services.AddSingleton<IPaymentGatewayService, PaymentGatewayService>();
     }
 }

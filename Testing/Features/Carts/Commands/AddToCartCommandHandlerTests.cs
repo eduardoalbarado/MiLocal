@@ -46,7 +46,7 @@ namespace YourApplication.UnitTests.Features.Carts.Commands
 
             unitOfWorkMock.Setup(u => u.GetRepository<Product>()).Returns(productRepositoryMock.Object);
             unitOfWorkMock.Setup(u => u.GetRepository<Cart>()).Returns(cartRepositoryMock.Object);
-            userContextServiceMock.Setup(uc => uc.GetUserContext()).Returns(new UserContext(userId.ToString(), "TestUser"));
+            userContextServiceMock.Setup(uc => uc.GetUserContext()).Returns(new UserContext(userId.ToString(), "TestUser", DateTime.UtcNow.ToString()));
 
             productRepositoryMock
                 .Setup(pr => pr.GetByIdAsync(productId, It.IsAny<CancellationToken>()))
@@ -87,7 +87,7 @@ namespace YourApplication.UnitTests.Features.Carts.Commands
                 .Setup(pr => pr.GetByIdAsync(productId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Product)null);
             unitOfWorkMock.Setup(u => u.GetRepository<Product>()).Returns(productRepositoryMock.Object);
-            userContextServiceMock.Setup(uc => uc.GetUserContext()).Returns(new UserContext(userId, "TestUser"));
+            userContextServiceMock.Setup(uc => uc.GetUserContext()).Returns(new UserContext(userId, "TestUser", DateTime.UtcNow.ToString()));
 
             var sut = new AddToCartCommandHandler(unitOfWorkMock.Object, mapperMock.Object, userContextServiceMock.Object);
 
@@ -133,7 +133,7 @@ namespace YourApplication.UnitTests.Features.Carts.Commands
                 .ReturnsAsync(cart);
             unitOfWorkMock.Setup(u => u.GetRepository<Product>()).Returns(productRepositoryMock.Object);
             unitOfWorkMock.Setup(u => u.GetRepository<Cart>()).Returns(cartRepositoryMock.Object);
-            userContextServiceMock.Setup(uc => uc.GetUserContext()).Returns(new UserContext(userId, "TestUser"));
+            userContextServiceMock.Setup(uc => uc.GetUserContext()).Returns(new UserContext(userId, "TestUser", DateTime.UtcNow.ToString()));
 
             var sut = new AddToCartCommandHandler(unitOfWorkMock.Object, mapperMock.Object, userContextServiceMock.Object);
 

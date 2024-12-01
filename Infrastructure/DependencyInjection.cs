@@ -15,28 +15,54 @@ public static class DependencyInjection
     {
         string environment = configuration.GetValue<string>("AZURE_FUNCTIONS_ENVIRONMENT") ?? "Development";
         bool isDevEnvironment = environment.Equals("Development", StringComparison.OrdinalIgnoreCase);
+        string databaseProvider = configuration.GetValue<string>("DatabaseProvider") ?? "Sqlite";
 
-        services.AddTransient<IDateTime, DateTimeService>();
+        ConfigureDatabase(services, configuration, isDevEnvironment, databaseProvider);
 
-        if (configuration.GetValue<bool>("UseInMemoryDatabase"))
-        {
-            services.AddDbContext<MiLocalDbContext>(options =>
-                options.UseInMemoryDatabase("AdminDb"));
-        }
-        else
-        {
-            services.AddDbContext<MiLocalDbContext>(options =>
-                options.UseSqlite($"Data Source={(isDevEnvironment ? "Data\\MiLocalDb.db" : "C:/home/MiLocalDb.db")}"));
-        }
-        services.AddScoped<IDbContext>(provider => provider.GetRequiredService<IDbContext>());
+
+
+        // Registering IDbContext as MiLocalDbContext
+        services.AddScoped<IDbContext, MiLocalDbContext>();
+
         // Registering the repositories
         services.AddTransient(typeof(IRepositoryAsync<>), typeof(RepositoryAsync<>));
+
         // Registering the UnitOfWork
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
         services.AddTransient<IEmailService, EmailService>();
         services.AddTransient<IDateTime, DateTimeService>();
         services.AddTransient<IPaymentGatewayClient, MercadoPagoPaymentGatewayClient>();
 
         return services;
+    }
+
+    private static void ConfigureDatabase(IServiceCollection services, IConfiguration configuration, bool isDevEnvironment, string databaseProvider)
+    {
+        if (configuration.GetValue<bool>("UseInMemoryDatabase"))
+        {
+            services.AddDbContext<MiLocalDbContext>(options =>
+                options.UseInMemoryDatabase("AdminDb"));
+        }
+        else if (databaseProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+        {
+            string sqlServerConnectionString = configuration.GetConnectionString("SqlServer") ?? throw new InvalidOperationException("Connection string 'SqlServer' is not defined in the configuration.");
+            services.AddDbContext<MiLocalDbContext>(options =>
+                options.UseSqlServer(sqlServerConnectionString, sqlOptions =>
+                {
+                    sqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "dbo");  // Optional: set migrations schema
+                })
+                .EnableSensitiveDataLogging(isDevEnvironment));
+        }
+        else if (databaseProvider.Equals("SQLite", StringComparison.OrdinalIgnoreCase))
+        {
+            string sqliteConnectionString = configuration.GetConnectionString("SQLite") ?? throw new InvalidOperationException("Connection string 'SQLite' is not defined in the configuration.");
+            services.AddDbContext<MiLocalDbContext>(options =>
+                options.UseSqlite(sqliteConnectionString)
+                .EnableSensitiveDataLogging(isDevEnvironment)
+                .UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll));
+        }
+        else
+        { throw new ArgumentException("Not a valid database type"); }
     }
 }

@@ -44,7 +44,7 @@ public class PaymentGatewayService : IPaymentGatewayService
     {
         var paymentGatewayRequest = new PaymentGatewayRequest
         {
-            TransactionId = order.OrderId.ToString(),
+            TransactionId = order.Id.ToString(),
             Email = order.CustomerEmail,
             Description = "Payment for order",
             Amount = order.TotalAmount,

@@ -4,7 +4,7 @@ using Application.Features.Carts.Queries.GetCart;
 using AutoMapper;
 using Domain.Entities;
 
-namespace Application.MappingProfiles1
+namespace Application.MappingProfiles
 {
     public class CartProfile : Profile
     {

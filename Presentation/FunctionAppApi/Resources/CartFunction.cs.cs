@@ -49,8 +49,10 @@ public class CartFunction : FunctionBase
 
     [Function("RemoveFromCart")]
     [OpenApiOperation(operationId: "removeFromCart", tags: new[] { "Cart" })]
+    [OpenApiParameter(name: "itemId", In = ParameterLocation.Path, Required = true, Type = typeof(int), Description = "The itemId of the Product")]
     public async Task<HttpResponseData> RemoveFromCart(
         [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "cart/items/{itemId}")] HttpRequestData request, int itemId)
+
     {
         _logger.LogInformation("RemoveFromCart function processed a request.");
 

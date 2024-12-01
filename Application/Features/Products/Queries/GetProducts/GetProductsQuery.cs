@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetProducts;
 
-public class GetProductsQuery : ProductDto, IRequest<PaginatedList<ProductDto>>
+public class GetProductsQuery : IRequest<PaginatedList<ProductDto>>
 {
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 10;
