@@ -1,5 +1,6 @@
 ﻿using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Abstractions;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
+using Microsoft.OpenApi.Any;
 using System;
 using System.Collections.Generic;
 
@@ -28,10 +29,30 @@ public class OpenApiConfigurationOptions : IOpenApiConfigurationOptions
     public bool ForceHttp { get; set; } = false;
     public bool ForceHttps { get; set; } = false;
     public List<IDocumentFilter> DocumentFilters { get; set; } = new List<IDocumentFilter>
-        {
-            new SecurityRequirementsDocumentFilter(),
-            new InternalErrorResponseDocumentFilter()
-        };
+    {
+        new SecurityRequirementsDocumentFilter(),
+        new InternalErrorResponseDocumentFilter(),
+        new UnauthorizedResponseDocumentFilter()
+    };
+
+    //// Definir el esquema unauthorizedResponse con el ejemplo corregido
+    //public IDictionary<string, OpenApiSchema> Schemas { get; set; } = new Dictionary<string, OpenApiSchema>
+    //{
+    //    ["unauthorizedResponse"] = new OpenApiSchema
+    //    {
+    //        Type = "object",
+    //        Properties = new Dictionary<string, OpenApiSchema>
+    //        {
+    //            ["error"] = new OpenApiSchema { Type = "string" },
+    //            ["message"] = new OpenApiSchema { Type = "string" }
+    //        },
+    //        Example = new OpenApiObject
+    //        {
+    //            ["error"] = new OpenApiString("Unauthorized"),
+    //            ["message"] = new OpenApiString("Access denied. User is not authorized.")
+    //        }
+    //    }
+    //};
 }
 
 public class SecurityRequirementsDocumentFilter : IDocumentFilter
